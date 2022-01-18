@@ -1,0 +1,11 @@
+Features that can be used in emotion recognition via voice
+1. Pitch
+2. Teager Energy Operator -> Number of harmonics (https://www.youtube.com/watch?v=znbfY-tXROk)
+3. Vocal tract features
+4. Pitch
+5. Energy
+6. MFCC 
+7. LPCC
+8. Formants
+
+https://machinelearningmastery.com/gentle-introduction-long-short-term-memory-networks-experts/
