@@ -1,27 +1,8 @@
-# ///////////////////////////////////////////////////////////////
-#
-# BY: WANDERSON M.PIMENTA
-# PROJECT MADE WITH: Qt Designer and PySide6
-# V: 1.0.0
-#
-# This project can be used freely for all uses, as long as they maintain the
-# respective credits only in the Python scripts, any information in the visual
-# interface (GUI) can be modified without any implication.
-#
-# There are limitations on Qt licenses if you want to use your products
-# commercially, I recommend reading them on the official website:
-# https://doc.qt.io/qtforpython/licenses.html
-#
-# ///////////////////////////////////////////////////////////////
-
 import sys
 import os
 import platform
 import cv2
 
-# IMPORT / GUI AND MODULES AND WIDGETS
-# ///////////////////////////////////////////////////////////////
-import qimage2ndarray
 from FaceDetectionThread import FaceDetectionThread
 import PIL
 from PIL import Image, ImageQt
@@ -146,47 +127,27 @@ class MainWindow(QMainWindow):
             UIFunctions.resetStyle(self, btnName)  # RESET ANOTHERS BUTTONS SELECTED
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
 
-            print("im; here dada ")
-
             self.timer.timeout.connect(self.display_video_stream)
             self.timer.start(30)
-
             self.face_detection_thread.run()
-            # pixmap = QPixmap("images/images/PyDracula.png")
-            # self.ui.label.setPixmap(pixmap)
-
-            print("im; here")
-
 
         if btnName == "btn_save":
-            # self.face_detection_thread.run()
+            self.timer.stop()
+            self.face_detection_thread.stop_running()
             print("Save BTN clicked!")
-
 
         # PRINT BTN NAME
         print(f'Button "{btnName}" pressed!')
 
-
     def display_video_stream(self):
-        """Read frame from camera and repaint QLabel widget.
-        """
         frame = self.face_detection_thread.get_frame()
         if frame is None:
             return
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-
         img = Image.fromarray(frame.astype(np.uint8))
         qim = ImageQt.ImageQt(img)
         pm = QPixmap.fromImage(qim)
-
-        #
-        # frame = cv2.flip(frame, 1)
-        #image = qimage2ndarray.array2qimage(frame)  # SOLUTION FOR MEMORY LEAK
-        #print(image)
-        #pixmap = QPixmap()
-        #pixmap = pixmap.fromImage(image=image)
         self.ui.label.setPixmap(pm)
 
     # RESIZE EVENTS
