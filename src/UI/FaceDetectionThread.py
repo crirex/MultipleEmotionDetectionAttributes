@@ -1,30 +1,18 @@
 import numpy as np
 from scipy.ndimage import zoom
 from scipy.spatial import distance
-# import imutils
-# from scipy import ndimage
-
 import dlib
-
 from tensorflow.keras.models import load_model
 from imutils import face_utils
-
-# import requests
-
 import cv2
-
-from PySide6.QtCore import Qt, QThread, Signal, Slot, QSize
-
-
-# from PySide6.QtGui import QAction, QImage, QKeySequence, QPixmap
-# from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox,
-#                                QHBoxLayout, QLabel, QMainWindow, QPushButton,
-#                                QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtCore import QThread
 
 
 class FaceDetectionThread(QThread):
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
+
+        self.is_running = True
 
         self.shape_x = 48
         self.shape_y = 48
@@ -32,6 +20,9 @@ class FaceDetectionThread(QThread):
         self.nClasses = 7
         self.model = load_model('Models/video.h5')
         self.frames = []
+
+    def stop_running(self):
+        self.is_running = False
 
     def get_frame(self):
         if len(self.frames) > 0:
@@ -101,6 +92,9 @@ class FaceDetectionThread(QThread):
         return new_face
 
     def run(self):
+
+        self.is_running = True
+
         (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
@@ -117,7 +111,7 @@ class FaceDetectionThread(QThread):
         # Lancer la capture video
         video_capture = cv2.VideoCapture(0)
 
-        while True:
+        while self.is_running:
             # Capture frame-by-frame
             ret, frame = video_capture.read()
 
@@ -237,14 +231,12 @@ class FaceDetectionThread(QThread):
 
             cv2.putText(frame, 'Number of Faces : ' + str(len(rects)), (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, 155, 1)
 
-            # print(frame)
+            print("Inside facedectionthread")
             self.frames.append(frame)
-            # cv2.imshow('Video', frame)
-
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
+        print("Outside facedetectionthread")
         # When everything is done, release the capture
         video_capture.release()
-        # cv2.destroyAllWindows()
