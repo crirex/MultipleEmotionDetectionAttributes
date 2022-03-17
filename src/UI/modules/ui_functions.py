@@ -259,8 +259,8 @@ class UIFunctions(MainWindow):
         self.ui.bgApp.setGraphicsEffect(self.shadow)
 
         # RESIZE WINDOW
-        self.sizegrip = QSizeGrip(self.ui.frame_size_grip)
-        self.sizegrip.setStyleSheet("width: 20px; height: 20px; margin 0px; padding: 0px;")
+        # self.sizegrip = QSizeGrip(self.ui.frame_size_grip)
+        # self.sizegrip.setStyleSheet("width: 20px; height: 20px; margin 0px; padding: 0px;")
 
         # MINIMIZE
         self.ui.minimizeAppBtn.clicked.connect(lambda: self.showMinimized())

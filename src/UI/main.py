@@ -66,6 +66,9 @@ class MainWindow(QMainWindow):
         widgets.btn_new.clicked.connect(self.buttonClick)
         widgets.btn_save.clicked.connect(self.buttonClick)
 
+        widgets.startButton.clicked.connect(self.buttonClick)
+        widgets.cancelButton.clicked.connect(self.buttonClick)
+
         # EXTRA LEFT BOX
         def openCloseLeftBox():
             UIFunctions.toggleLeftBox(self, True)
@@ -127,13 +130,16 @@ class MainWindow(QMainWindow):
             UIFunctions.resetStyle(self, btnName)  # RESET ANOTHERS BUTTONS SELECTED
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
 
+        if btnName == "startButton":
             self.timer.timeout.connect(self.display_video_stream)
             self.timer.start(30)
             self.face_detection_thread.run()
 
-        if btnName == "btn_save":
+        if btnName == "cancelButton":
             self.timer.stop()
             self.face_detection_thread.stop_running()
+
+        if btnName == "btn_save":
             print("Save BTN clicked!")
 
         # PRINT BTN NAME
@@ -148,7 +154,7 @@ class MainWindow(QMainWindow):
         img = Image.fromarray(frame.astype(np.uint8))
         qim = ImageQt.ImageQt(img)
         pm = QPixmap.fromImage(qim)
-        self.ui.label.setPixmap(pm)
+        self.ui.labelVideo.setPixmap(pm)
 
     # RESIZE EVENTS
     # ///////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@ from PIL import Image
 class FaceDetectionThread(QThread):
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
-
+        self.calling_window = parent
         self.is_running = True
 
         self.shape_x = 48
@@ -117,6 +117,10 @@ class FaceDetectionThread(QThread):
         (ebrStart, ebrEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 
         video_capture = cv2.VideoCapture(0)
+        if video_capture is None or not video_capture.isOpened():
+            self.calling_window.ui.labelVideo.setText("No camera detected")
+            return
+
         while self.is_running:
             ret, frame = video_capture.read()
 

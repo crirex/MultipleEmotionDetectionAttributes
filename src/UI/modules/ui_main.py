@@ -23,6 +23,7 @@ class Ui_MainWindow(object):
         self.styleSheet = QWidget(MainWindow)
         self.styleSheet.setObjectName(u"styleSheet")
         font = QFont()
+        font.setFamily(u"Segoe UI")
         font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
@@ -587,6 +588,7 @@ class Ui_MainWindow(object):
         self.titleLeftApp.setObjectName(u"titleLeftApp")
         self.titleLeftApp.setGeometry(QRect(70, 8, 160, 20))
         font1 = QFont()
+        font1.setFamily(u"Segoe UI Semibold")
         font1.setPointSize(12)
         font1.setBold(False)
         font1.setItalic(False)
@@ -597,6 +599,7 @@ class Ui_MainWindow(object):
         self.titleLeftDescription.setGeometry(QRect(70, 27, 160, 16))
         self.titleLeftDescription.setMaximumSize(QSize(16777215, 16))
         font2 = QFont()
+        font2.setFamily(u"Segoe UI")
         font2.setPointSize(8)
         font2.setBold(False)
         font2.setItalic(False)
@@ -977,6 +980,7 @@ class Ui_MainWindow(object):
         self.maximizeRestoreAppBtn.setMinimumSize(QSize(28, 28))
         self.maximizeRestoreAppBtn.setMaximumSize(QSize(28, 28))
         font3 = QFont()
+        font3.setFamily(u"Segoe UI")
         font3.setPointSize(10)
         font3.setBold(False)
         font3.setItalic(False)
@@ -1313,11 +1317,11 @@ class Ui_MainWindow(object):
         __qtablewidgetitem23 = QTableWidgetItem()
         self.tableWidget.setItem(0, 3, __qtablewidgetitem23)
         self.tableWidget.setObjectName(u"tableWidget")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
-        self.tableWidget.setSizePolicy(sizePolicy3)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
+        self.tableWidget.setSizePolicy(sizePolicy2)
         palette = QPalette()
         brush = QBrush(QColor(221, 221, 221, 255))
         brush.setStyle(Qt.SolidPattern)
@@ -1383,13 +1387,64 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.widgets)
         self.new_page = QWidget()
         self.new_page.setObjectName(u"new_page")
-        self.verticalLayout_20 = QVBoxLayout(self.new_page)
-        self.verticalLayout_20.setObjectName(u"verticalLayout_20")
-        self.label = QLabel(self.new_page)
-        self.label.setObjectName(u"label")
-        self.label.setAlignment(Qt.AlignCenter)
+        self.gridLayout_5 = QGridLayout(self.new_page)
+        self.gridLayout_5.setObjectName(u"gridLayout_5")
+        self.gridLayout_8 = QGridLayout()
+        self.gridLayout_8.setObjectName(u"gridLayout_8")
+        self.labelAudio = QLabel(self.new_page)
+        self.labelAudio.setObjectName(u"labelAudio")
+        self.labelAudio.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_20.addWidget(self.label)
+        self.gridLayout_8.addWidget(self.labelAudio, 0, 1, 1, 1)
+
+        self.labelVideo = QLabel(self.new_page)
+        self.labelVideo.setObjectName(u"labelVideo")
+        self.labelVideo.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_8.addWidget(self.labelVideo, 0, 0, 1, 1)
+
+
+        self.gridLayout_5.addLayout(self.gridLayout_8, 2, 0, 1, 2)
+
+        self.verticalLayout_20 = QVBoxLayout()
+        self.verticalLayout_20.setObjectName(u"verticalLayout_20")
+        self.emotioTextEdit = QPlainTextEdit(self.new_page)
+        self.emotioTextEdit.setObjectName(u"emotioTextEdit")
+        sizePolicy.setHeightForWidth(self.emotioTextEdit.sizePolicy().hasHeightForWidth())
+        self.emotioTextEdit.setSizePolicy(sizePolicy)
+        self.emotioTextEdit.setMinimumSize(QSize(200, 200))
+        self.emotioTextEdit.setStyleSheet(u"background-color: rgb(33, 37, 43);")
+
+        self.verticalLayout_20.addWidget(self.emotioTextEdit)
+
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.cancelButton = QPushButton(self.new_page)
+        self.cancelButton.setObjectName(u"cancelButton")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.cancelButton.sizePolicy().hasHeightForWidth())
+        self.cancelButton.setSizePolicy(sizePolicy4)
+        self.cancelButton.setMinimumSize(QSize(150, 0))
+        self.cancelButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
+
+        self.horizontalLayout_6.addWidget(self.cancelButton)
+
+        self.startButton = QPushButton(self.new_page)
+        self.startButton.setObjectName(u"startButton")
+        sizePolicy4.setHeightForWidth(self.startButton.sizePolicy().hasHeightForWidth())
+        self.startButton.setSizePolicy(sizePolicy4)
+        self.startButton.setMinimumSize(QSize(150, 0))
+        self.startButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
+
+        self.horizontalLayout_6.addWidget(self.startButton)
+
+
+        self.verticalLayout_20.addLayout(self.horizontalLayout_6)
+
+
+        self.gridLayout_5.addLayout(self.verticalLayout_20, 4, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.new_page)
 
@@ -1490,31 +1545,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_5.setSpacing(0)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.creditsLabel = QLabel(self.bottomBar)
-        self.creditsLabel.setObjectName(u"creditsLabel")
-        self.creditsLabel.setMaximumSize(QSize(16777215, 16))
-        font5 = QFont()
-        font5.setBold(False)
-        font5.setItalic(False)
-        self.creditsLabel.setFont(font5)
-        self.creditsLabel.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
+        # self.frame_size_grip = QFrame(self.bottomBar)
+        # self.frame_size_grip.setObjectName(u"frame_size_grip")
+        # self.frame_size_grip.setMinimumSize(QSize(20, 0))
+        # self.frame_size_grip.setMaximumSize(QSize(20, 16777215))
+        # self.frame_size_grip.setFrameShape(QFrame.NoFrame)
+        # self.frame_size_grip.setFrameShadow(QFrame.Raised)
 
-        self.horizontalLayout_5.addWidget(self.creditsLabel)
-
-        self.version = QLabel(self.bottomBar)
-        self.version.setObjectName(u"version")
-        self.version.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-
-        self.horizontalLayout_5.addWidget(self.version)
-
-        self.frame_size_grip = QFrame(self.bottomBar)
-        self.frame_size_grip.setObjectName(u"frame_size_grip")
-        self.frame_size_grip.setMinimumSize(QSize(20, 0))
-        self.frame_size_grip.setMaximumSize(QSize(20, 16777215))
-        self.frame_size_grip.setFrameShape(QFrame.NoFrame)
-        self.frame_size_grip.setFrameShadow(QFrame.Raised)
-
-        self.horizontalLayout_5.addWidget(self.frame_size_grip)
+        # self.horizontalLayout_5.addWidget(self.frame_size_grip)
 
 
         self.verticalLayout_6.addWidget(self.bottomBar)
@@ -1559,20 +1597,19 @@ class Ui_MainWindow(object):
         self.btn_adjustments.setText(QCoreApplication.translate("MainWindow", u"Adjustments", None))
         self.btn_more.setText(QCoreApplication.translate("MainWindow", u"More", None))
         self.textEdit.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:'Segoe UI'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-weight:600; color:#ff79c6;\">PyDracula</span></p>\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" color:#ffffff;\">An interface created using Python and PySide (support for PyQt), and with colors based on the Dracula theme created by Zeno Rocha.</span></p>\n"
-"<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-inde"
-                        "nt:0; text-indent:0px;\"><span style=\" color:#ffffff;\">MIT License</span></p>\n"
+"<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><"
+                        "span style=\" color:#ffffff;\">MIT License</span></p>\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" color:#bd93f9;\">Created by: Wanderson M. Pimenta</span></p>\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-weight:600; color:#ff79c6;\">Convert UI</span></p>\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; color:#ffffff;\">pyside6-uic main.ui &gt; ui_main.py</span></p>\n"
 "<p align=\"center\" style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-weight:600; color:#ff79c6;\">Convert QRC</span></p>\n"
-"<p align=\"center\" "
-                        "style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; color:#ffffff;\">pyside6-rcc resources.qrc -o resources_rc.py</span></p></body></html>", None))
-        self.titleRightInfo.setText(QCoreApplication.translate("MainWindow", u"PyDracula APP - Theme with colors based on Dracula for Python.", None))
+"<p align=\"center\" style=\" margin-top:12px; "
+                        "margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; color:#ffffff;\">pyside6-rcc resources.qrc -o resources_rc.py</span></p></body></html>", None))
 #if QT_CONFIG(tooltip)
         self.settingsTopBtn.setToolTip(QCoreApplication.translate("MainWindow", u"Settings", None))
 #endif // QT_CONFIG(tooltip)
@@ -1655,11 +1692,12 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem23.setText(QCoreApplication.translate("MainWindow", u"Line", None));
         self.tableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.label.setText(QCoreApplication.translate("MainWindow", u"NEW PAGE TEST", None))
+        self.labelAudio.setText(QCoreApplication.translate("MainWindow", u"Audio", None))
+        self.labelVideo.setText(QCoreApplication.translate("MainWindow", u"Video", None))
+        self.emotioTextEdit.setPlainText("")
+        self.cancelButton.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
+        self.startButton.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
         self.btn_logout.setText(QCoreApplication.translate("MainWindow", u"Logout", None))
-        self.creditsLabel.setText(QCoreApplication.translate("MainWindow", u"By: Wanderson M. Pimenta", None))
-        self.version.setText(QCoreApplication.translate("MainWindow", u"v1.0.3", None))
     # retranslateUi
-
