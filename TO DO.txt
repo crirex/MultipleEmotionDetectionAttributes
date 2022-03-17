@@ -1,0 +1,38 @@
+- GUI App
+	- general clean up
+	- get rid of anything that's not used
+
+- For Video
+	- change layout of showing the emotions
+	- show if the user has eyeglasses (curently it's typing in the console)
+	- show if the user has eyes closed/opened
+	- refactor + break the run() method in multiple smaller functions
+	- record all the major actions -> state, eyes, glasses and store them for statistics
+	
+- For Audio
+	- Add microphone plotting
+	- Record data untill the user presses cancel/stop
+	- Show in real time emotions after 3 seconds of usage 
+		or show them all the statistics area in tabelar form + export csv 
+	-
+	
+- For Text
+	- Investigate how it works
+	- implement it
+	- after the user typed or while is typeing, show emotions or show them in the statistics area
+	
+
+- Statistics
+	- different plots for the features (camera, audio, text) - histograms, pies, wiskers, diagrams etc
+	- some correlations ?? see hoe much of each emotion correlate
+		ex. Camera happy and text/audio sad -> something wrong!
+	- export them in csv or png for the plots (or other form)
+	
+Maybe to add:
+- Settings
+	- activate/inactivate features
+	- user login - in order to keep data associated with somebody 
+	- store data (sql, nosql, files)
+	- random screenshots of the app ??
+	
+	
