@@ -15,3 +15,4 @@
 # ///////////////////////////////////////////////////////////////
 
 from . custom_grips import CustomGrip
+from . audio_plotting import AudioPlotter

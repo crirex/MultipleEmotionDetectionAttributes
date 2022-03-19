@@ -133,13 +133,23 @@ class MainWindow(QMainWindow):
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
 
         if btnName == "startButton":
+            # Video
             self.timer.timeout.connect(self.display_video_stream)
             self.timer.start(30)
+
+            # Audio
+            self.ui.audioPlotterWidget.start_recording()
+
+            # must be at final, IDK if it blocks main thread or something ...
             self.face_detection_thread.run()
 
         if btnName == "cancelButton":
+            # Video
             self.timer.stop()
             self.face_detection_thread.stop_running()
+
+            # Audio
+            self.ui.audioPlotterWidget.stop_recording()
 
         if btnName == "btn_save":
             print("Save BTN clicked!")

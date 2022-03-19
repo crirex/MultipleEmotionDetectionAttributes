@@ -2688,16 +2688,6 @@ background-repeat: no-repeat;</string>
                       <layout class="QGridLayout" name="gridLayout_5">
                        <item row="2" column="0" colspan="2">
                         <layout class="QGridLayout" name="gridLayout_8">
-                         <item row="0" column="1">
-                          <widget class="QLabel" name="labelAudio">
-                           <property name="text">
-                            <string>Audio</string>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignCenter</set>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="0" column="0">
                           <widget class="QLabel" name="labelVideo">
                            <property name="text">
@@ -2707,6 +2697,9 @@ background-repeat: no-repeat;</string>
                             <set>Qt::AlignCenter</set>
                            </property>
                           </widget>
+                         </item>
+                         <item row="0" column="1">
+                          <widget class="AudioPlotter" name="audioPlotterWidget" native="true"/>
                          </item>
                         </layout>
                        </item>
@@ -3087,6 +3080,14 @@ background-repeat: no-repeat;</string>
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AudioPlotter</class>
+   <extends>QWidget</extends>
+   <header>widgets.audio_plotting.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

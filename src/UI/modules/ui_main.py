@@ -12,6 +12,8 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
+from widgets.audio_plotting import AudioPlotter
+
 from .resources_rc import *
 
 class Ui_MainWindow(object):
@@ -1391,11 +1393,6 @@ class Ui_MainWindow(object):
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.gridLayout_8 = QGridLayout()
         self.gridLayout_8.setObjectName(u"gridLayout_8")
-        self.labelAudio = QLabel(self.new_page)
-        self.labelAudio.setObjectName(u"labelAudio")
-        self.labelAudio.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout_8.addWidget(self.labelAudio, 0, 1, 1, 1)
 
         self.labelVideo = QLabel(self.new_page)
         self.labelVideo.setObjectName(u"labelVideo")
@@ -1403,6 +1400,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout_8.addWidget(self.labelVideo, 0, 0, 1, 1)
 
+        self.audioPlotterWidget = AudioPlotter(self.new_page)
+        self.audioPlotterWidget.setObjectName(u"audioPlotterWidget")
+
+        self.gridLayout_8.addWidget(self.audioPlotterWidget, 0, 1, 1, 1)
 
         self.gridLayout_5.addLayout(self.gridLayout_8, 2, 0, 1, 2)
 
@@ -1545,15 +1546,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_5.setSpacing(0)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
-        # self.frame_size_grip = QFrame(self.bottomBar)
-        # self.frame_size_grip.setObjectName(u"frame_size_grip")
-        # self.frame_size_grip.setMinimumSize(QSize(20, 0))
-        # self.frame_size_grip.setMaximumSize(QSize(20, 16777215))
-        # self.frame_size_grip.setFrameShape(QFrame.NoFrame)
-        # self.frame_size_grip.setFrameShadow(QFrame.Raised)
-
-        # self.horizontalLayout_5.addWidget(self.frame_size_grip)
-
 
         self.verticalLayout_6.addWidget(self.bottomBar)
 
@@ -1692,7 +1684,6 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem23.setText(QCoreApplication.translate("MainWindow", u"Line", None));
         self.tableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.labelAudio.setText(QCoreApplication.translate("MainWindow", u"Audio", None))
         self.labelVideo.setText(QCoreApplication.translate("MainWindow", u"Video", None))
         self.emotioTextEdit.setPlainText("")
         self.cancelButton.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))

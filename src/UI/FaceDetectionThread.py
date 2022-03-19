@@ -102,7 +102,6 @@ class FaceDetectionThread(QThread):
         return False
 
     def run(self):
-
         self.is_running = True
 
         (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
@@ -211,9 +210,10 @@ class FaceDetectionThread(QThread):
                 print("EAR: " + str(ear))
 
                 # Output Glasses Detection
-                cv2.putText(frame, "Glasses: " + str(self.has_glasses(shape_img, gray)), (40, 380),
+                has_glasses = str(self.has_glasses(shape_img, gray))
+                cv2.putText(frame, "Glasses: " + has_glasses, (40, 380),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-                print("Glasses: " + str(self.has_glasses(shape_img, gray)))
+                print("Glasses: " + has_glasses)
 
                 # And plot its contours
                 leftEyeHull = cv2.convexHull(leftEye)
