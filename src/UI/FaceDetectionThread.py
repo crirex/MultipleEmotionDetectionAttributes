@@ -1,3 +1,4 @@
+import Manager
 import numpy as np
 from scipy.ndimage import zoom
 from scipy.spatial import distance
@@ -23,9 +24,7 @@ class FaceDetectionThread(QThread):
 
         self.nose_bridge = [28, 29, 30, 31, 33, 34, 35]
 
-        self.model = load_model('Models/video.h5', compile=False)
         self.face_detect = dlib.get_frontal_face_detector()
-        self.predictor_landmarks = dlib.shape_predictor("Models/face_landmarks.dat")
 
         self.frames = []
 
@@ -116,20 +115,19 @@ class FaceDetectionThread(QThread):
         (eblStart, eblEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
         (ebrStart, ebrEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 
-        video_capture = cv2.VideoCapture(0)
-        if video_capture is None or not video_capture.isOpened():
+        if Manager.activeCamera is None or not Manager.activeCamera.isOpened():
             self.calling_window.ui.labelVideo.setText("No camera detected")
             return
 
         while self.is_running:
-            ret, frame = video_capture.read()
+            ret, frame = Manager.activeCamera.read()
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             rects = self.face_detect(gray, 0)
 
             for (i, rect) in enumerate(rects):
 
-                shape_img = self.predictor_landmarks(gray, rect)
+                shape_img = Manager.videoPredictorLandmarks(gray, rect)
                 shape = face_utils.shape_to_np(shape_img)
 
                 (x, y, w, h) = face_utils.rect_to_bb(rect)
@@ -151,7 +149,7 @@ class FaceDetectionThread(QThread):
                 face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
                 # Make Prediction
-                prediction = self.model.predict(face)
+                prediction = Manager.videoModel.predict(face)
                 prediction_result = np.argmax(prediction)
 
                 # Rectangle around the face
@@ -207,17 +205,15 @@ class FaceDetectionThread(QThread):
                 rightEAR = self.eye_aspect_ratio(rightEye)
                 ear = (leftEAR + rightEAR) / 2.0
 
-                # print(ear)
-                if ear < self.thresh:
-                    cv2.putText(frame, "Eyes Closed", (40, 400), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
-                else:
-                    cv2.putText(frame, "Eyes Opened", (40, 400), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
+                # Output Eye Detection Results
+                cv2.putText(frame, "Eyes " + ("Closed" if ear < self.thresh else "Opened"), (40, 400),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
+                print("EAR: " + str(ear))
 
-                # Has eyeglasses
-                if self.has_glasses(shape_img, gray):
-                    print("yay")
-                else:
-                    print("nay")
+                # Output Glasses Detection
+                cv2.putText(frame, "Glasses: " + str(self.has_glasses(shape_img, gray)), (40, 380),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
+                print("Glasses: " + str(self.has_glasses(shape_img, gray)))
 
                 # And plot its contours
                 leftEyeHull = cv2.convexHull(leftEye)
@@ -255,4 +251,4 @@ class FaceDetectionThread(QThread):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        video_capture.release()
+        # Manager.activeCamera.release()
