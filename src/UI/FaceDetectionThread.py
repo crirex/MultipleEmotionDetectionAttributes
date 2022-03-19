@@ -1,3 +1,4 @@
+import Manager
 import numpy as np
 from scipy.ndimage import zoom
 from scipy.spatial import distance
@@ -6,19 +7,25 @@ from tensorflow.keras.models import load_model
 from imutils import face_utils
 import cv2
 from PySide6.QtCore import QThread
+from PIL import Image
 
 
 class FaceDetectionThread(QThread):
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
-
+        self.calling_window = parent
         self.is_running = True
 
         self.shape_x = 48
         self.shape_y = 48
-        self.input_shape = (self.shape_x, self.shape_y, 1)
+
+        self.thresh = 0.17
         self.nClasses = 7
-        self.model = load_model('Models/video.h5')
+
+        self.nose_bridge = [28, 29, 30, 31, 33, 34, 35]
+
+        self.face_detect = dlib.get_frontal_face_detector()
+
         self.frames = []
 
     def stop_running(self):
@@ -59,40 +66,42 @@ class FaceDetectionThread(QThread):
 
         return gray, detected_faces, coord
 
-    def extract_face_features(self, faces, offset_coefficients=(0.075, 0.05)):
-        gray = faces[0]
-        detected_face = faces[1]
+    def is_face_detected(self, face):
+        return face.shape[0] != 0 and face.shape[1] != 0
 
-        new_face = []
+    def has_glasses(self, shape, frame):
+        landmarks = np.array([[p.x, p.y] for p in shape.parts()])
 
-        for det in detected_face:
-            # Region dans laquelle la face est détectée
-            x, y, w, h = det
-            # X et y correspondent à la conversion en gris par gray, et w, h correspondent à la hauteur/largeur
+        nose_bridge_x = []
+        nose_bridge_y = []
 
-            # Offset coefficient, np.floor takes the lowest integer (delete border of the image)
-            horizontal_offset = np.int(np.floor(offset_coefficients[0] * w))
-            vertical_offset = np.int(np.floor(offset_coefficients[1] * h))
+        for i in self.nose_bridge:
+            nose_bridge_x.append(landmarks[i][0])
+            nose_bridge_y.append(landmarks[i][1])
 
-            # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # gray transforme l'image
-            extracted_face = gray[y + vertical_offset:y + h, x + horizontal_offset:x - horizontal_offset + w]
+        ### x_min and x_max
+        x_min = min(nose_bridge_x)
+        x_max = max(nose_bridge_x)
 
-            # Zoom sur la face extraite
-            new_extracted_face = zoom(extracted_face,
-                                      (self.shape_x / extracted_face.shape[0], self.shape_y / extracted_face.shape[1]))
-            # cast type float
-            new_extracted_face = new_extracted_face.astype(np.float32)
-            # scale
-            new_extracted_face /= float(new_extracted_face.max())
-            # print(new_extracted_face)
+        ### ymin (from top eyebrow coordinate),  ymax
+        y_min = landmarks[20][1]
+        y_max = landmarks[30][1]
 
-            new_face.append(new_extracted_face)
+        img2 = Image.fromarray(frame.astype(np.uint8))
+        img2 = img2.crop((x_min, y_min, x_max, y_max))
 
-        return new_face
+        img_blur = cv2.GaussianBlur(np.array(img2), (3, 3), sigmaX=0, sigmaY=0)
+
+        edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200)
+
+        edges_center = edges.T[(int(len(edges.T) / 2))]
+
+        if 255 in edges_center:
+            return True
+
+        return False
 
     def run(self):
-
         self.is_running = True
 
         (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
@@ -105,32 +114,27 @@ class FaceDetectionThread(QThread):
         (eblStart, eblEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
         (ebrStart, ebrEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 
-        face_detect = dlib.get_frontal_face_detector()
-        predictor_landmarks = dlib.shape_predictor("Models/face_landmarks.dat")
-
-        # Lancer la capture video
-        video_capture = cv2.VideoCapture(0)
+        if Manager.activeCamera is None or not Manager.activeCamera.isOpened():
+            self.calling_window.ui.labelVideo.setText("No camera detected")
+            return
 
         while self.is_running:
-            # Capture frame-by-frame
-            ret, frame = video_capture.read()
-
-            face_index = 0
+            ret, frame = Manager.activeCamera.read()
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            rects = face_detect(gray, 0)
-            # gray, detected_faces, coord = detect_face(frame)
+            rects = self.face_detect(gray, 0)
 
             for (i, rect) in enumerate(rects):
 
-                shape = predictor_landmarks(gray, rect)
-                shape = face_utils.shape_to_np(shape)
+                shape_img = Manager.videoPredictorLandmarks(gray, rect)
+                shape = face_utils.shape_to_np(shape_img)
 
-                # Identify face coordinates
                 (x, y, w, h) = face_utils.rect_to_bb(rect)
                 face = gray[y:y + h, x:x + w]
 
-                if face.shape[0] == 0 or face.shape[1] == 0:
+                is_face_detected = self.is_face_detected(face)
+                if not is_face_detected:
+                    self.frames.append(frame)
                     continue
 
                 # Zoom on extracted face
@@ -144,7 +148,7 @@ class FaceDetectionThread(QThread):
                 face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
                 # Make Prediction
-                prediction = self.model.predict(face)
+                prediction = Manager.videoModel.predict(face)
                 prediction_result = np.argmax(prediction)
 
                 # Rectangle around the face
@@ -200,6 +204,17 @@ class FaceDetectionThread(QThread):
                 rightEAR = self.eye_aspect_ratio(rightEye)
                 ear = (leftEAR + rightEAR) / 2.0
 
+                # Output Eye Detection Results
+                cv2.putText(frame, "Eyes " + ("Closed" if ear < self.thresh else "Opened"), (40, 400),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
+                print("EAR: " + str(ear))
+
+                # Output Glasses Detection
+                has_glasses = str(self.has_glasses(shape_img, gray))
+                cv2.putText(frame, "Glasses: " + has_glasses, (40, 380),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
+                print("Glasses: " + has_glasses)
+
                 # And plot its contours
                 leftEyeHull = cv2.convexHull(leftEye)
                 rightEyeHull = cv2.convexHull(rightEye)
@@ -231,12 +246,9 @@ class FaceDetectionThread(QThread):
 
             cv2.putText(frame, 'Number of Faces : ' + str(len(rects)), (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, 155, 1)
 
-            print("Inside facedectionthread")
             self.frames.append(frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        print("Outside facedetectionthread")
-        # When everything is done, release the capture
-        video_capture.release()
+        # Manager.activeCamera.release()
