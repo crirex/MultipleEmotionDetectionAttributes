@@ -1,19 +1,19 @@
-- GUI App
+- GUI App CRISTI + BOGDI
     - general clean up
     - get rid of anything that's not used
 
-- For Video
-    - change layout of showing the emotions
-    - show if the user has eyeglasses (currently it's typing in the console)
-    - show if the user has eyes closed/opened
-    - refactor + break the run() method in multiple smaller functions
-    - the first prediction/camera open takes to long -> fix it !
-    - record all the major actions -> state, eyes, glasses and store them for statistics
+- For Video	
+    - change layout of showing the emotions														CRISTI -> 
+    - show if the user has eyeglasses (currently it's typing in the console)					CRISTI -> DONE
+    - show if the user has eyes closed/opened													CRISTI -> DONE
+    - refactor + break the run() method in multiple smaller functions							CRISTI -> 
+    - the first prediction/camera open takes to long -> fix it !								CRISTI -> DONE?
+    - record all the major actions -> state, (eyes, glasses)? and store them for statistics		CRISTI ->
     
 - For Audio
-    - Add microphone plotting
-    - Record data until the user presses cancel/stop
-    - Show in real time emotions after 3 seconds of usage 
+    - Add microphone plotting																	BOGDI -> DONE
+    - Record data until the user presses cancel/stop											BOGDI -> 
+    - Show in real time emotions after 3 seconds of usage 										BOGDI
         or show them all the statistics area in tabelar form + export csv 
     -
     
