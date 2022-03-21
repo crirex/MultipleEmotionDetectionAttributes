@@ -1,17 +1,15 @@
 import sys
 import os
-import platform
 import cv2
 from scipy.ndimage import zoom
 
 import Manager
-from FaceDetectionThread import FaceDetectionThread
-import PIL
+from emotion_recognition import FaceDetectionThread
 from PIL import Image, ImageQt
 import numpy as np
 
-from modules import *
 from widgets import *
+from modules import *
 
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
 
@@ -190,12 +188,15 @@ class MainWindow(QMainWindow):
 # This is extremely under development but makes the camera start instantly. Only works if face is visible on startup
 def prepareManager():
     from tensorflow.keras.models import load_model
-    import cv2
     import dlib
     from imutils import face_utils
     Manager.videoModel = load_model('Models/video.h5', compile=False)
     Manager.videoPredictorLandmarks = dlib.shape_predictor("Models/face_landmarks.dat")
     Manager.activeCamera = cv2.VideoCapture(0)
+
+    if Manager.activeCamera is None or not Manager.activeCamera.isOpened():
+        return
+
     _, _ = Manager.activeCamera.read()
     ret, frame = Manager.activeCamera.read()
 
