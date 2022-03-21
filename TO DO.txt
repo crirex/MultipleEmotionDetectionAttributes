@@ -1,14 +1,15 @@
 - GUI App CRISTI + BOGDI
     - general clean up
-    - get rid of anything that's not used
+	- put the correct imports in the top classes and remove import loop and unused imports 		CRISTI -> DONE
 
 - For Video	
     - change layout of showing the emotions														CRISTI -> 
     - show if the user has eyeglasses (currently it's typing in the console)					CRISTI -> DONE
     - show if the user has eyes closed/opened													CRISTI -> DONE
     - refactor + break the run() method in multiple smaller functions							CRISTI -> 
-    - the first prediction/camera open takes to long -> fix it !								CRISTI -> DONE?
+    - the first prediction/camera open takes to long -> fix it !								CRISTI -> DONE
     - record all the major actions -> state, (eyes, glasses)? and store them for statistics		CRISTI ->
+    - change the font of the shown text so that it is white with black contour					CRISTI ->
     
 - For Audio
     - Add microphone plotting																	BOGDI -> DONE

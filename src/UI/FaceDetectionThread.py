@@ -1,13 +1,24 @@
-import Manager
+from utils.Manager import Manager
 import numpy as np
 from scipy.ndimage import zoom
 from scipy.spatial import distance
 import dlib
-from tensorflow.keras.models import load_model
 from imutils import face_utils
 import cv2
 from PySide6.QtCore import QThread
 from PIL import Image
+
+
+def eye_aspect_ratio(eye):
+    A = distance.euclidean(eye[1], eye[5])
+    B = distance.euclidean(eye[2], eye[4])
+    C = distance.euclidean(eye[0], eye[3])
+    ear = (A + B) / (2.0 * C)
+    return ear
+
+
+def is_face_detected(face):
+    return face.shape[0] != 0 and face.shape[1] != 0
 
 
 class FaceDetectionThread(QThread):
@@ -23,7 +34,7 @@ class FaceDetectionThread(QThread):
         self.nClasses = 7
 
         self.nose_bridge = [28, 29, 30, 31, 33, 34, 35]
-
+        self.manager = Manager()
         self.face_detect = dlib.get_frontal_face_detector()
 
         self.frames = []
@@ -36,18 +47,10 @@ class FaceDetectionThread(QThread):
             return self.frames.pop(0)
         return None
 
-    def eye_aspect_ratio(self, eye):
-        A = distance.euclidean(eye[1], eye[5])
-        B = distance.euclidean(eye[2], eye[4])
-        C = distance.euclidean(eye[0], eye[3])
-        ear = (A + B) / (2.0 * C)
-        return ear
-
     def detect_face(self, frame):
 
         # Cascade classifier pre-trained model
-        cascPath = 'Models/face_landmarks.dat'
-        faceCascade = cv2.CascadeClassifier(cascPath)
+        faceCascade = cv2.CascadeClassifier('Models/face_landmarks.dat')
 
         # BGR -> Gray conversion
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -60,14 +63,11 @@ class FaceDetectionThread(QThread):
 
         for x, y, w, h in detected_faces:
             if w > 100:
-                sub_img = frame[y:y + h, x:x + w]
+                # sub_img = frame[y:y + h, x:x + w]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 1)
                 coord.append([x, y, w, h])
 
         return gray, detected_faces, coord
-
-    def is_face_detected(self, face):
-        return face.shape[0] != 0 and face.shape[1] != 0
 
     def has_glasses(self, shape, frame):
         landmarks = np.array([[p.x, p.y] for p in shape.parts()])
@@ -79,11 +79,11 @@ class FaceDetectionThread(QThread):
             nose_bridge_x.append(landmarks[i][0])
             nose_bridge_y.append(landmarks[i][1])
 
-        ### x_min and x_max
+        # x_min and x_max
         x_min = min(nose_bridge_x)
         x_max = max(nose_bridge_x)
 
-        ### ymin (from top eyebrow coordinate),  ymax
+        # ymin (from top eyebrow coordinate),  ymax
         y_min = landmarks[20][1]
         y_max = landmarks[30][1]
 
@@ -114,26 +114,25 @@ class FaceDetectionThread(QThread):
         (eblStart, eblEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
         (ebrStart, ebrEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 
-        if Manager.activeCamera is None or not Manager.activeCamera.isOpened():
+        if self.manager.activeCamera is None or not self.manager.activeCamera.isOpened():
             self.calling_window.ui.labelVideo.setText("No camera detected")
             return
 
         while self.is_running:
-            ret, frame = Manager.activeCamera.read()
+            ret, frame = self.manager.activeCamera.read()
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             rects = self.face_detect(gray, 0)
 
             for (i, rect) in enumerate(rects):
 
-                shape_img = Manager.videoPredictorLandmarks(gray, rect)
+                shape_img = self.manager.videoPredictorLandmarks(gray, rect)
                 shape = face_utils.shape_to_np(shape_img)
 
                 (x, y, w, h) = face_utils.rect_to_bb(rect)
                 face = gray[y:y + h, x:x + w]
 
-                is_face_detected = self.is_face_detected(face)
-                if not is_face_detected:
+                if not is_face_detected(face):
                     self.frames.append(frame)
                     continue
 
@@ -148,7 +147,7 @@ class FaceDetectionThread(QThread):
                 face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
                 # Make Prediction
-                prediction = Manager.videoModel.predict(face)
+                prediction = self.manager.videoModel.predict(face)
                 prediction_result = np.argmax(prediction)
 
                 # Rectangle around the face
@@ -200,8 +199,8 @@ class FaceDetectionThread(QThread):
                 rightEye = shape[rStart:rEnd]
 
                 # Compute Eye Aspect Ratio
-                leftEAR = self.eye_aspect_ratio(leftEye)
-                rightEAR = self.eye_aspect_ratio(rightEye)
+                leftEAR = eye_aspect_ratio(leftEye)
+                rightEAR = eye_aspect_ratio(rightEye)
                 ear = (leftEAR + rightEAR) / 2.0
 
                 # Output Eye Detection Results
@@ -251,4 +250,4 @@ class FaceDetectionThread(QThread):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        # Manager.activeCamera.release()
+        # self.manager.activeCamera.release()

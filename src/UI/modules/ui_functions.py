@@ -16,7 +16,14 @@
 
 # MAIN FILE
 # ///////////////////////////////////////////////////////////////
-from main import *
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QEvent, QTimer, Qt
+from PySide6.QtGui import QColor, QIcon
+from PySide6.QtWidgets import QPushButton, QGraphicsDropShadowEffect
+
+from main import MainWindow
+
+from modules import Settings
+from widgets import CustomGrip
 
 # GLOBALS
 # ///////////////////////////////////////////////////////////////
@@ -30,7 +37,7 @@ class UIFunctions(MainWindow):
     def maximize_restore(self):
         global GLOBAL_STATE
         status = GLOBAL_STATE
-        if status == False:
+        if not status:
             self.showMaximized()
             GLOBAL_STATE = True
             self.ui.appMargins.setContentsMargins(0, 0, 0, 0)
