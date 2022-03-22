@@ -1,14 +1,13 @@
-import sys
 import os
+import sys
+
 import cv2
-from scipy.ndimage import zoom
-
-import Manager
-from emotion_recognition import FaceDetectionThread
-from PIL import Image, ImageQt
 import numpy as np
+from PIL import Image, ImageQt
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
 
-from widgets import *
+from emotion_recognition import FaceDetectionThread
 from modules import *
 
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
@@ -35,7 +34,7 @@ class MainWindow(QMainWindow):
         # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
         # ///////////////////////////////////////////////////////////////
         Settings.ENABLE_CUSTOM_TITLE_BAR = True
-        Settings.THREAD_REFFERENCE = self.face_detection_thread
+        Settings.THREAD_REFERENCE = self.face_detection_thread
 
         # APP NAME
         # ///////////////////////////////////////////////////////////////
@@ -185,50 +184,7 @@ class MainWindow(QMainWindow):
             print('Mouse click: RIGHT CLICK')
 
 
-# This is extremely under development but makes the camera start instantly. Only works if face is visible on startup
-def prepareManager():
-    from tensorflow.keras.models import load_model
-    import dlib
-    from imutils import face_utils
-    Manager.videoModel = load_model('Models/video.h5', compile=False)
-    Manager.videoPredictorLandmarks = dlib.shape_predictor("Models/face_landmarks.dat")
-    Manager.activeCamera = cv2.VideoCapture(0)
-
-    if Manager.activeCamera is None or not Manager.activeCamera.isOpened():
-        return
-
-    _, _ = Manager.activeCamera.read()
-    ret, frame = Manager.activeCamera.read()
-
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    face_detect = dlib.get_frontal_face_detector()
-    rects = face_detect(gray, 0)
-
-    for (i, rect) in enumerate(rects):
-
-        shape_img = Manager.videoPredictorLandmarks(gray, rect)
-        shape = face_utils.shape_to_np(shape_img)
-
-        (x, y, w, h) = face_utils.rect_to_bb(rect)
-        face = gray[y:y + h, x:x + w]
-
-        # Zoom on extracted face
-        face = zoom(face, (48 / face.shape[0], 48 / face.shape[1]))
-
-        # Cast type float
-        face = face.astype(np.float32)
-
-        # Scale
-        face /= float(face.max())
-        face = np.reshape(face.flatten(), (1, 48, 48, 1))
-
-        # Make Prediction
-        _ = Manager.videoModel.predict(face) # This is causing the slight lag issue
-        break
-
-
 if __name__ == "__main__":
-    prepareManager()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("icon.ico"))
     window = MainWindow()

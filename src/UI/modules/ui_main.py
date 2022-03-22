@@ -8,8 +8,8 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
+from PySide6.QtCore import Qt, QSize, QCoreApplication, QMetaObject, QRect
+from PySide6.QtGui import QColor, QIcon, QFont, QCursor, QPalette, QBrush
 from PySide6.QtWidgets import *
 
 from widgets.audio_plotting import AudioPlotter
