@@ -7,6 +7,7 @@ from imutils import face_utils
 import cv2
 from PySide6.QtCore import QThread
 from PIL import Image
+from PySide6.QtWidgets import QMessageBox
 
 
 def eye_aspect_ratio(eye):
@@ -115,9 +116,10 @@ class FaceDetectionThread(QThread):
         (ebrStart, ebrEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
 
         if self.manager.activeCamera is None or not self.manager.activeCamera.isOpened():
+            QMessageBox.warning(None, "Video", "There is no video input device available.")
             self.calling_window.ui.labelVideo.setText("No camera detected")
             return
-
+        
         while self.is_running:
             ret, frame = self.manager.activeCamera.read()
 
