@@ -3,10 +3,11 @@ import sys
 
 import cv2
 import numpy as np
-from PIL import Image, ImageQt
 
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
+
+from PIL import Image, ImageQt
 
 from emotion_recognition import FaceDetectionThread
 from modules import *
@@ -37,7 +38,7 @@ class MainWindow(QMainWindow):
 
         # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
         # ///////////////////////////////////////////////////////////////
-        Settings.ENABLE_CUSTOM_TITLE_BAR = True
+        Settings.ENABLE_CUSTOM_TITLE_BAR = False
         Settings.THREAD_REFERENCE = self.face_detection_thread
 
         # APP NAME
