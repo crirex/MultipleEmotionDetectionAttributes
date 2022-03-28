@@ -10,7 +10,6 @@ from PIL import Image
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QThread
 
-from utils.observer import Subject
 from utils.Logger import Logger
 from utils.Manager import Manager
 

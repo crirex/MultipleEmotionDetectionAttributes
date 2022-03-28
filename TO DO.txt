@@ -17,12 +17,22 @@
     - Show in real time emotions after 3 seconds of usage 										BOGDI
         or show them all the statistics area in tabelar form + export csv 
     -
-    
-- For Text ?????
+  
+- For Text
     - Investigate how it works
     - implement it
     - after the user typed or while is typeing, show emotions or show them in the statistics area
-    
+ 
+- Jupyter notebook
+	- Audio
+		- Data explore + Preprocessing				BOGDI -> DONE
+		- Training using LSTM						BOGDI -> DONE
+	- Video
+		- Data explore + Preprocessing				BOGDI -> DONE
+		- Training 									BOGDI
+	- Text
+		- Data explore + Preprocessing
+		- Training
 
 - Statistics
     - different plots for the features (camera, audio, text) - histograms, pies, wiskers, diagrams etc
