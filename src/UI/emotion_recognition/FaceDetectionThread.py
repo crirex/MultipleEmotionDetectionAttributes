@@ -1,16 +1,18 @@
-from utils.Logger import Logger
-from utils.Manager import Manager
+import cv2
+import dlib
 import numpy as np
+
 from scipy.ndimage import zoom
 from scipy.spatial import distance
-import dlib
 from imutils import face_utils
-import cv2
-from PySide6.QtCore import QThread
 from PIL import Image
+
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtCore import QThread
 
 from utils.observer import Subject
+from utils.Logger import Logger
+from utils.Manager import Manager
 
 
 def eye_aspect_ratio(eye):
@@ -25,7 +27,7 @@ def is_face_detected(face):
     return face.shape[0] != 0 and face.shape[1] != 0
 
 
-class FaceDetectionThread(QThread, Subject):
+class FaceDetectionThread(QThread):
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
         self._calling_window = parent
