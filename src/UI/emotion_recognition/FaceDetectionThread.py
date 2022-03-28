@@ -25,7 +25,7 @@ def is_face_detected(face):
     return face.shape[0] != 0 and face.shape[1] != 0
 
 
-class FaceDetectionThread(QThread, Subject):
+class FaceDetectionThread(QThread):
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
         self._calling_window = parent
@@ -43,19 +43,6 @@ class FaceDetectionThread(QThread, Subject):
         self._face_detect = dlib.get_frontal_face_detector()
 
         self._frames = []
-
-        self._observers = []
-
-    def attach(self, observer):
-        self._observers.append(observer)
-
-    def detach(self, observer):
-        self._observers.remove(observer)
-
-    def notify(self):
-        # here should go some logic
-        # iterate over every observer and do stuff
-        pass
 
     def stop_running(self):
         self._is_running = False
