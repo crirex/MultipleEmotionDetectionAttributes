@@ -46,19 +46,6 @@ class FaceDetectionThread(QThread):
 
         self._frames = []
 
-        self._observers = []
-
-    def attach(self, observer):
-        self._observers.append(observer)
-
-    def detach(self, observer):
-        self._observers.remove(observer)
-
-    def notify(self):
-        # here should go some logic
-        # iterate over every observer and do stuff
-        pass
-
     def stop_running(self):
         self._is_running = False
 
