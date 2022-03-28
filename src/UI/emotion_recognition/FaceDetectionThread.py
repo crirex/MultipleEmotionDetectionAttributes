@@ -1,16 +1,18 @@
-from utils.Logger import Logger
-from utils.Manager import Manager
+import cv2
+import dlib
 import numpy as np
+
 from scipy.ndimage import zoom
 from scipy.spatial import distance
-import dlib
 from imutils import face_utils
-import cv2
-from PySide6.QtCore import QThread
 from PIL import Image
+
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtCore import QThread
 
 from utils.observer import Subject
+from utils.Logger import Logger
+from utils.Manager import Manager
 
 
 def eye_aspect_ratio(eye):
