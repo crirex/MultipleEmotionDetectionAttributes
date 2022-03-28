@@ -3,12 +3,15 @@ import sys
 
 import cv2
 import numpy as np
-from PIL import Image, ImageQt
+
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
 
+from PIL import Image, ImageQt
+
 from emotion_recognition import FaceDetectionThread
 from modules import *
+from utils.Logger import Logger
 
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
 
@@ -18,6 +21,8 @@ widgets = None
 
 
 class MainWindow(QMainWindow):
+    logger = Logger()
+
     def __init__(self):
         QMainWindow.__init__(self)
 
@@ -33,7 +38,7 @@ class MainWindow(QMainWindow):
 
         # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
         # ///////////////////////////////////////////////////////////////
-        Settings.ENABLE_CUSTOM_TITLE_BAR = True
+        Settings.ENABLE_CUSTOM_TITLE_BAR = False
         Settings.THREAD_REFERENCE = self.face_detection_thread
 
         # APP NAME
@@ -125,11 +130,15 @@ class MainWindow(QMainWindow):
 
         # SHOW NEW PAGE
         if btnName == "btn_new":
+
+            MainWindow.logger.log_info("Emotion recognition panel clicked")
             widgets.stackedWidget.setCurrentWidget(widgets.new_page)  # SET PAGE
             UIFunctions.resetStyle(self, btnName)  # RESET ANOTHERS BUTTONS SELECTED
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
 
         if btnName == "startButton":
+            MainWindow.logger.log_info("Start emotion recognition")
+
             # Video
             self.timer.timeout.connect(self.display_video_stream)
             self.timer.start(30)
@@ -141,6 +150,8 @@ class MainWindow(QMainWindow):
             self.face_detection_thread.run()
 
         if btnName == "cancelButton":
+            MainWindow.logger.log_info("Stop emotion recognition")
+
             # Video
             self.timer.stop()
             self.face_detection_thread.stop_running()
@@ -185,6 +196,8 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    MainWindow.logger.log_info("Application starts")
+
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("icon.ico"))
     window = MainWindow()
