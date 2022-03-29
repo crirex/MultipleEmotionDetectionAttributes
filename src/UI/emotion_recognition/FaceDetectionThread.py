@@ -47,6 +47,8 @@ class FaceDetectionThread(QThread):
         self._videoTextFont = cv2.QT_FONT_NORMAL
         self._videoTextFontScale = 0.5
         self._videoTextColor = (255, 255, 255)
+        self._facialRectangleColor = (0, 255, 0)
+        self._facialDotsColor = (0, 0, 255)
         self._videoTextThickness = 0
 
         self.FACIAL_LANDMARKS_LEFT_EYE = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
@@ -122,7 +124,7 @@ class FaceDetectionThread(QThread):
 
     def drawFaceDots(self, frame, shape):
         for (j, k) in shape:
-            cv2.circle(img=frame, center=(j, k), radius=1, color=(0, 0, 255), thickness=-1)
+            cv2.circle(img=frame, center=(j, k), radius=1, color=self._facialDotsColor, thickness=-1)
 
     def drawRectangle(self, frame, x, y, width, height):
         cv2.rectangle(frame, (x, y), (x + width, y + height), (0, 255, 0), 2)
@@ -135,25 +137,25 @@ class FaceDetectionThread(QThread):
         predictedLabelPosition = (x + width - 10, y - 10)
         if prediction_result == 0:
             cv2.putText(img=frame, text="Angry", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
         elif prediction_result == 1:
             cv2.putText(img=frame, text="Disgust", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
         elif prediction_result == 2:
             cv2.putText(img=frame, text="Fear", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
         elif prediction_result == 3:
             cv2.putText(img=frame, text="Happy", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
         elif prediction_result == 4:
             cv2.putText(img=frame, text="Sad", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
         elif prediction_result == 5:
             cv2.putText(img=frame, text="Surprise", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
         else:
             cv2.putText(img=frame, text="Neutral", org=predictedLabelPosition,
-                        fontFace=self._videoTextFont, fontScale=1, color=(0, 255, 0), thickness=2)
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
 
     def drawPredictions(self, frame, prediction):
         cv2.putText(img=frame, text="Emotional report:",
