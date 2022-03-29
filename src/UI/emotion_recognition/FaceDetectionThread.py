@@ -43,6 +43,21 @@ class FaceDetectionThread(QThread):
         self._manager = Manager()
         self._face_detect = dlib.get_frontal_face_detector()
 
+        self._videoTextFont = cv2.QT_FONT_NORMAL
+        self._videoTextFontScale = 0.5
+        self._videoTextColor = (255, 255, 255)
+        self._facialRectangleColor = (0, 255, 0)
+        self._facialDotsColor = (0, 0, 255)
+        self._videoTextThickness = 0
+
+        self.FACIAL_LANDMARKS_LEFT_EYE = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+        self.FACIAL_LANDMARKS_RIGHT_EYE = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+        self.FACIAL_LANDMARKS_LEFT_EYEBROW = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
+        self.FACIAL_LANDMARKS_RIGHT_EYEBROW = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
+        self.FACIAL_LANDMARKS_NOSE = face_utils.FACIAL_LANDMARKS_IDXS["nose"]
+        self.FACIAL_LANDMARKS_MOUTH = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
+        self.FACIAL_LANDMARKS_JAW = face_utils.FACIAL_LANDMARKS_IDXS["jaw"]
+
         self._frames = []
 
     def stop_running(self):
@@ -62,14 +77,13 @@ class FaceDetectionThread(QThread):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Cascade MultiScale classifier
-        detected_faces = faceCascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=6,
+        detected_faces = faceCascade.detectMultiScale(image=gray, scaleFactor=1.1, minNeighbors=6,
                                                       minSize=(self._shape_x, self._shape_y),
                                                       flags=cv2.CASCADE_SCALE_IMAGE)
         coord = []
 
         for x, y, w, h in detected_faces:
             if w > 100:
-                # sub_img = frame[y:y + h, x:x + w]
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 1)
                 coord.append([x, y, w, h])
 
@@ -107,38 +121,154 @@ class FaceDetectionThread(QThread):
 
         return False
 
+    def drawFaceDots(self, frame, shape):
+        for (j, k) in shape:
+            cv2.circle(img=frame, center=(j, k), radius=1, color=self._facialDotsColor, thickness=-1)
+
+    def drawRectangle(self, frame, x, y, width, height):
+        cv2.rectangle(frame, (x, y), (x + width, y + height), (0, 255, 0), 2)
+        cv2.putText(img=frame, text="Face", org=(x - 10, y - 10),
+                    fontFace=self._videoTextFont, fontScale=self._videoTextFontScale, color=(0, 255, 0),
+                    thickness=self._videoTextThickness)
+
+    def drawMainPrediction(self, frame, prediction, x, y, width):
+        prediction_result = np.argmax(prediction)
+        predictedLabelPosition = (x + width - 10, y - 10)
+        if prediction_result == 0:
+            cv2.putText(img=frame, text="Angry", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+        elif prediction_result == 1:
+            cv2.putText(img=frame, text="Disgust", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+        elif prediction_result == 2:
+            cv2.putText(img=frame, text="Fear", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+        elif prediction_result == 3:
+            cv2.putText(img=frame, text="Happy", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+        elif prediction_result == 4:
+            cv2.putText(img=frame, text="Sad", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+        elif prediction_result == 5:
+            cv2.putText(img=frame, text="Surprise", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+        else:
+            cv2.putText(img=frame, text="Neutral", org=predictedLabelPosition,
+                        fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
+
+    def drawPredictions(self, frame, prediction):
+        cv2.putText(img=frame, text="Emotional report:",
+                    org=(40, 120), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Angry : {}%".format(str(round(prediction[0][0] * 100, 2))),
+                    org=(40, 140), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Disgust : {}%".format(str(round(prediction[0][1] * 100, 2))),
+                    org=(40, 160), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Fear : {}%".format(str(round(prediction[0][2] * 100, 2))),
+                    org=(40, 180), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Happy : {}%".format(str(round(prediction[0][3] * 100, 2))),
+                    org=(40, 200), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Sad : {}%".format(str(round(prediction[0][4] * 100, 2))),
+                    org=(40, 220), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Surprise : {}%".format(str(round(prediction[0][5] * 100, 2))),
+                    org=(40, 240), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+        cv2.putText(img=frame, text="Neutral : {}%".format(str(round(prediction[0][6] * 100, 2))),
+                    org=(40, 260), fontFace=self._videoTextFont,
+                    fontScale=self._videoTextFontScale, color=self._videoTextColor,
+                    thickness=self._videoTextThickness)
+
+    def drawIfOpenEyes(self, frame, shape):
+        (lStart, lEnd) = self.FACIAL_LANDMARKS_LEFT_EYE
+        (rStart, rEnd) = self.FACIAL_LANDMARKS_RIGHT_EYE
+        leftEye = shape[lStart:lEnd]
+        rightEye = shape[rStart:rEnd]
+        leftEAR = eye_aspect_ratio(leftEye)
+        rightEAR = eye_aspect_ratio(rightEye)
+        ear = (leftEAR + rightEAR) / 2.0
+        cv2.putText(img=frame, text="Eyes {}".format("Closed" if ear < self._ear_thresh else "Opened"),
+                    org=(40, 400), fontFace=self._videoTextFont, fontScale=self._videoTextFontScale,
+                    color=self._videoTextColor, thickness=self._videoTextThickness)
+
+    def drawIfGlasses(self, frame, shape_img, gray):
+        has_glasses = str(self.has_glasses(shape_img, gray))
+        cv2.putText(img=frame, text="Glasses: {}".format(has_glasses),
+                    org=(40, 380), fontFace=self._videoTextFont, fontScale=self._videoTextFontScale,
+                    color=self._videoTextColor, thickness=self._videoTextThickness)
+
+    def drawEyes(self, frame, shape):
+        (lStart, lEnd) = self.FACIAL_LANDMARKS_LEFT_EYE
+        (rStart, rEnd) = self.FACIAL_LANDMARKS_RIGHT_EYE
+        leftEye = shape[lStart:lEnd]
+        rightEye = shape[rStart:rEnd]
+        leftEyeHull = cv2.convexHull(leftEye)
+        rightEyeHull = cv2.convexHull(rightEye)
+        cv2.drawContours(image=frame, contours=[leftEyeHull], contourIdx=-1,
+                         color=(0, 255, 0), thickness=1)
+        cv2.drawContours(image=frame, contours=[rightEyeHull], contourIdx=-1,
+                         color=(0, 255, 0), thickness=1)
+
+    def drawNose(self, frame, shape):
+        (nStart, nEnd) = self.FACIAL_LANDMARKS_NOSE
+        nose = shape[nStart:nEnd]
+        noseHull = cv2.convexHull(nose)
+        cv2.drawContours(image=frame, contours=[noseHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
+
+    def drawMouth(self, frame, shape):
+        (mStart, mEnd) = self.FACIAL_LANDMARKS_MOUTH
+        mouth = shape[mStart:mEnd]
+        mouthHull = cv2.convexHull(mouth)
+        cv2.drawContours(image=frame, contours=[mouthHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
+
+    def drawJaw(self, frame, shape):
+        (jStart, jEnd) = self.FACIAL_LANDMARKS_JAW
+        jaw = shape[jStart:jEnd]
+        jawHull = cv2.convexHull(jaw)
+        cv2.drawContours(image=frame, contours=[jawHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
+
+    def drawEyebrows(self, frame, shape):
+        (eblStart, eblEnd) = self.FACIAL_LANDMARKS_LEFT_EYEBROW
+        (ebrStart, ebrEnd) = self.FACIAL_LANDMARKS_RIGHT_EYEBROW
+        ebl = shape[eblStart:eblEnd]
+        ebr = shape[ebrStart:ebrEnd]
+        eblHull = cv2.convexHull(ebl)
+        ebrHull = cv2.convexHull(ebr)
+        cv2.drawContours(image=frame, contours=[eblHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
+        cv2.drawContours(image=frame, contours=[ebrHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
+
     def run(self):
-        self._is_running = True
-
-        (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
-        (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
-
-        (nStart, nEnd) = face_utils.FACIAL_LANDMARKS_IDXS["nose"]
-        (mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
-        (jStart, jEnd) = face_utils.FACIAL_LANDMARKS_IDXS["jaw"]
-
-        (eblStart, eblEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eyebrow"]
-        (ebrStart, ebrEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eyebrow"]
-
         if self._manager.activeCamera is None or not self._manager.activeCamera.isOpened():
             QMessageBox.warning(None, "Video", "There is no video input device available.")
             self._calling_window.ui.labelVideo.setText("No camera detected")
             return
 
+        self._is_running = True
+
         try:
             while self._is_running:
-                ret, frame = self._manager.activeCamera.read()
+                _, frame = self._manager.activeCamera.read()
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 rects = self._face_detect(gray, 0)
 
-                for (i, rect) in enumerate(rects):
-
-                    shape_img = self._manager.videoPredictorLandmarks(gray, rect)
+                if len(rects):
+                    shape_img = self._manager.videoPredictorLandmarks(gray, rects[0])
                     shape = face_utils.shape_to_np(shape_img)
 
-                    (x, y, w, h) = face_utils.rect_to_bb(rect)
-                    face = gray[y:y + h, x:x + w]
+                    (x, y, width, height) = face_utils.rect_to_bb(rects[0])
+                    face = gray[y:y + height, x:x + width]
 
                     if not is_face_detected(face):
                         self._frames.append(frame)
@@ -156,102 +286,18 @@ class FaceDetectionThread(QThread):
 
                     # Make Prediction
                     prediction = self._manager.videoModel.predict(face)
-                    prediction_result = np.argmax(prediction)
 
-                    # Rectangle around the face
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-                    cv2.putText(frame, "Face #{}".format(i + 1), (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                (0, 255, 0), 2)
-
-                    for (j, k) in shape:
-                        cv2.circle(frame, (j, k), 1, (0, 0, 255), -1)
-
-                    # 1. Add prediction probabilities
-                    cv2.putText(frame, "----------------", (40, 100 + 180 * i), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
-                    cv2.putText(frame, "Emotional report : Face #" + str(i + 1), (40, 120 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
-                    cv2.putText(frame, "Angry : " + str(round(prediction[0][0], 3)), (40, 140 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
-                    cv2.putText(frame, "Disgust : " + str(round(prediction[0][1], 3)), (40, 160 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
-                    cv2.putText(frame, "Fear : " + str(round(prediction[0][2], 3)), (40, 180 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-                    cv2.putText(frame, "Happy : " + str(round(prediction[0][3], 3)), (40, 200 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-                    cv2.putText(frame, "Sad : " + str(round(prediction[0][4], 3)), (40, 220 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-                    cv2.putText(frame, "Surprise : " + str(round(prediction[0][5], 3)), (40, 240 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-                    cv2.putText(frame, "Neutral : " + str(round(prediction[0][6], 3)), (40, 260 + 180 * i),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-
-                    # 2. Annotate main image with a label
-                    if prediction_result == 0:
-                        cv2.putText(frame, "Angry", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    elif prediction_result == 1:
-                        cv2.putText(frame, "Disgust", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    elif prediction_result == 2:
-                        cv2.putText(frame, "Fear", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    elif prediction_result == 3:
-                        cv2.putText(frame, "Happy", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    elif prediction_result == 4:
-                        cv2.putText(frame, "Sad", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    elif prediction_result == 5:
-                        cv2.putText(frame, "Surprise", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                    else:
-                        cv2.putText(frame, "Neutral", (x + w - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-                    # 3. Eye Detection and Blink Count
-                    leftEye = shape[lStart:lEnd]
-                    rightEye = shape[rStart:rEnd]
-
-                    # Compute Eye Aspect Ratio
-                    leftEAR = eye_aspect_ratio(leftEye)
-                    rightEAR = eye_aspect_ratio(rightEye)
-                    ear = (leftEAR + rightEAR) / 2.0
-
-                    # Output Eye Detection Results
-                    cv2.putText(frame, "Eyes " + ("Closed" if ear < self._ear_thresh else "Opened"), (40, 400),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 0)
-                    print("EAR: " + str(ear))
-
-                    # Output Glasses Detection
-                    has_glasses = str(self.has_glasses(shape_img, gray))
-                    cv2.putText(frame, "Glasses: " + has_glasses, (40, 380),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 155, 1)
-                    print("Glasses: " + has_glasses)
-
-                    # And plot its contours
-                    leftEyeHull = cv2.convexHull(leftEye)
-                    rightEyeHull = cv2.convexHull(rightEye)
-                    cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-                    cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
-                    # 4. Detect Nose
-                    nose = shape[nStart:nEnd]
-                    noseHull = cv2.convexHull(nose)
-                    cv2.drawContours(frame, [noseHull], -1, (0, 255, 0), 1)
-
-                    # 5. Detect Mouth
-                    mouth = shape[mStart:mEnd]
-                    mouthHull = cv2.convexHull(mouth)
-                    cv2.drawContours(frame, [mouthHull], -1, (0, 255, 0), 1)
-
-                    # 6. Detect Jaw
-                    jaw = shape[jStart:jEnd]
-                    jawHull = cv2.convexHull(jaw)
-                    cv2.drawContours(frame, [jawHull], -1, (0, 255, 0), 1)
-
-                    # 7. Detect Eyebrows
-                    ebr = shape[ebrStart:ebrEnd]
-                    ebrHull = cv2.convexHull(ebr)
-                    cv2.drawContours(frame, [ebrHull], -1, (0, 255, 0), 1)
-                    ebl = shape[eblStart:eblEnd]
-                    eblHull = cv2.convexHull(ebl)
-                    cv2.drawContours(frame, [eblHull], -1, (0, 255, 0), 1)
-
-                cv2.putText(frame, 'Number of Faces : ' + str(len(rects)), (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, 155, 1)
+                    self.drawPredictions(frame, prediction)
+                    self.drawRectangle(frame, x, y, width, height)
+                    self.drawMainPrediction(frame, prediction, x, y, width)
+                    self.drawIfOpenEyes(frame, shape)
+                    self.drawIfGlasses(frame, shape_img, gray)
+                    self.drawEyes(frame, shape)
+                    self.drawNose(frame, shape)
+                    self.drawMouth(frame, shape)
+                    self.drawJaw(frame, shape)
+                    self.drawEyebrows(frame, shape)
+                    self.drawFaceDots(frame, shape)
 
                 self._frames.append(frame)
 
