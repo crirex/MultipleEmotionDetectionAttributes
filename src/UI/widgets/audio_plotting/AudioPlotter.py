@@ -3,6 +3,9 @@ from PySide6.QtCore import (QPointF, Slot)
 from PySide6.QtMultimedia import (QAudioFormat, QAudioSource, QMediaDevices)
 from PySide6.QtWidgets import QMessageBox
 
+import pyaudio
+import threading
+
 SAMPLE_COUNT = 2000
 RESOLUTION = 4
 
@@ -25,7 +28,7 @@ class AudioPlotter(QChartView):
 
         self.device = input_devices[0]
         self._io_device_plotting = None
-        self._io_device = None
+        self._audio_input_thread = None
         self._buffer = [QPointF(x, 0) for x in range(SAMPLE_COUNT)]
         self._series = QLineSeries()
         self._chart = QChart()
@@ -50,39 +53,48 @@ class AudioPlotter(QChartView):
         self._series.append(self._buffer)
 
         self._audio_input_plotting = QAudioSource(self.device, get_audio_format(1, 8000, QAudioFormat.UInt8), self)
-        self._audio_input = QAudioSource(self.device, get_audio_format(), self)
 
+        self._channels = 1
+        self._frame_rate = 16000
+        self._frames_per_buffer = 1024
+
+        self._pyAudioObject = pyaudio.PyAudio()
+        self._audio_input_stream = self._pyAudioObject.open(
+            format=pyaudio.paInt16,
+            channels=self._channels,
+            rate=self._frame_rate,
+            input=True,
+            frames_per_buffer=self._frames_per_buffer)
         self._frames = []
+
+    def record_voice(self):
+        self._audio_input_stream.start_stream()
+        while self._audio_input_stream.is_active():
+            data = self._audio_input_stream.read(self._frames_per_buffer)
+            self._frames.append(data)
 
     def start_recording(self):
         self._io_device_plotting = self._audio_input_plotting.start()
         self._io_device_plotting.readyRead.connect(self._readyRead)
 
-        self._io_device = self._audio_input.start()
-        self._io_device.readyRead.connect(self._store_data)
+        self._audio_input_thread = threading.Thread(target=self.record_voice)
+        self._audio_input_thread.start()
 
     def stop_recording(self):
-        if self._audio_input_plotting is not None \
-                and self._audio_input is not None:
+        if self._audio_input_plotting is not None and self._audio_input_stream is not None:
             self._audio_input_plotting.stop()
-            self._audio_input.stop()
+
+            self._audio_input_stream.stop_stream()
+            self._audio_input_stream.close()
 
             if __debug__:
-                import wave
-                wf = wave.open("test.wav", 'w')
-                wf.setnchannels(1)
-                wf.setsampwidth(2)
-                wf.setframerate(16000)
-                wf.writeframes(b''.join(self._frames))
-                wf.close()
+                from utils.Wave import Wave
+                wave = Wave()
+                wave.write_wave("test.wav", self._frames)
 
     def closeEvent(self, event):
         self.stop_recording()
         event.accept()
-
-    @Slot()
-    def _store_data(self):
-        self._frames.append(self._io_device.readAll().data())
 
     @Slot()
     def _readyRead(self):
