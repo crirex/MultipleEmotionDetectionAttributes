@@ -11,6 +11,12 @@
     - record all the major actions -> state, (eyes, glasses)? and store them for statistics		CRISTI ->
     - change the font of the shown text so that it is white with black contour					CRISTI ->
     
+	
+- Settings tab
+	- Enable/Disable Audio
+	- Enable/Disable Video
+	- Enable/Disable Text
+
 - For Audio
     - Add microphone plotting																	BOGDI -> DONE
     - Record data until the user presses cancel/stop											BOGDI -> 
@@ -21,7 +27,8 @@
 - For Text
     - Investigate how it works
     - implement it
-    - after the user typed or while is typeing, show emotions or show them in the statistics area
+    - after the user typed or while is typeing, show emotions or show them in the statistics area'
+	
  
 - Jupyter notebook
 	- Audio
@@ -34,11 +41,17 @@
 		- Data explore + Preprocessing
 		- Training
 
-- Statistics
+1. Interviu / analiza candidat
+2. Generare automata profil candidat
+
+- Statistics puse in contextul profilului
     - different plots for the features (camera, audio, text) - histograms, pies, wiskers, diagrams etc
     - some correlations ?? see hoe much of each emotion correlate
         ex. Camera happy and text/audio sad -> something wrong!
     - export them in csv or png for the plots (or other form)
+	
+	- at the end f=of the interview, reunite the data into something and then save it ( any format)
+
     
 Maybe to add:
 - Settings
@@ -47,3 +60,4 @@ Maybe to add:
     - user login - in order to keep data associated with somebody 
     - store data (sql, nosql, files)
     - random screenshots of the app ??
+	

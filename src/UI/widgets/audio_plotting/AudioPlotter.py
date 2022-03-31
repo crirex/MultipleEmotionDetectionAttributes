@@ -3,8 +3,7 @@ from PySide6.QtCore import (QPointF, Slot)
 from PySide6.QtMultimedia import (QAudioFormat, QAudioSource, QMediaDevices)
 from PySide6.QtWidgets import QMessageBox
 
-import pyaudio
-import threading
+from emotion_recognition import VoiceEmotionDetectionThread
 
 SAMPLE_COUNT = 2000
 RESOLUTION = 4
@@ -54,43 +53,18 @@ class AudioPlotter(QChartView):
 
         self._audio_input_plotting = QAudioSource(self.device, get_audio_format(1, 8000, QAudioFormat.UInt8), self)
 
-        self._channels = 1
-        self._frame_rate = 16000
-        self._frames_per_buffer = 1024
-
-        self._pyAudioObject = pyaudio.PyAudio()
-        self._audio_input_stream = self._pyAudioObject.open(
-            format=pyaudio.paInt16,
-            channels=self._channels,
-            rate=self._frame_rate,
-            input=True,
-            frames_per_buffer=self._frames_per_buffer)
-        self._frames = []
-
-    def record_voice(self):
-        self._audio_input_stream.start_stream()
-        while self._audio_input_stream.is_active():
-            data = self._audio_input_stream.read(self._frames_per_buffer)
-            self._frames.append(data)
+        self._audio_recording_thread = VoiceEmotionDetectionThread(self)
 
     def start_recording(self):
         self._io_device_plotting = self._audio_input_plotting.start()
         self._io_device_plotting.readyRead.connect(self._readyRead)
 
-        self._audio_input_thread = threading.Thread(target=self.record_voice)
-        self._audio_input_thread.start()
+        self._audio_recording_thread.start()
 
     def stop_recording(self):
-        if self._audio_input_plotting is not None and self._audio_input_stream is not None:
+        if self._audio_input_plotting is not None:
             self._audio_input_plotting.stop()
-
-            self._audio_input_stream.stop_stream()
-            self._audio_input_stream.close()
-
-            if __debug__:
-                from utils.Wave import Wave
-                wave = Wave()
-                wave.write_wave("test.wav", self._frames)
+            self._audio_recording_thread.stop_recording()
 
     def closeEvent(self, event):
         self.stop_recording()
