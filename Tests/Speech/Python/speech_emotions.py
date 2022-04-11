@@ -15,6 +15,9 @@ from tensorflow.keras.layers import Input, Dense, Dropout, Activation, TimeDistr
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization, Flatten
 from tensorflow.keras.layers import LSTM
 
+
+from tensorflow.keras.models import load_model
+
 '''
 Speech Emotion Recognition
 '''
@@ -27,11 +30,13 @@ class SpeechEmotionRecognition:
 
         # Load prediction model
         if subdir_model is not None:
-            self._model = self.build_model()
-            self._model.load_weights(subdir_model)
+            # self._model = self.build_model()
+            # self._model.load_weights(subdir_model)
+            self._model = load_model(subdir_model)
 
         # Emotion encoding
         self._emotion = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Neutral', 5: 'Sad', 6: 'Surprise'}
+        self._model.summary()
 
     '''
     Voice recording function
@@ -72,7 +77,7 @@ class SpeechEmotionRecognition:
         p.terminate()
         print('* End Recording * ')
 
-        np_data = np.frombuffer(frames[0])
+        np_data = [np.frombuffer(frame) for frame in frames]
         # Export audio recording to wav format
         wf = wave.open(filename, 'w')
         wf.setnchannels(channels)
@@ -181,6 +186,7 @@ class SpeechEmotionRecognition:
         # Read audio file
         y, sr = librosa.core.load(filename, sr=sample_rate, offset=0.5)
 
+        y_test = y.reshape(1, 1, -1)
         # Split audio signals into chunks
         chunks = self.frame(y.reshape(1, 1, -1), chunk_step, chunk_size)
 
@@ -236,6 +242,6 @@ class SpeechEmotionRecognition:
 
 if __name__ == '__main__':
     speechEmotionRecognition = SpeechEmotionRecognition("./Models/[CNN-LSTM]W2.hdf5")
-    # speechEmotionRecognition.voice_recording('./sounds/test_record_29_03.wav', duration=3)
-    prediction = speechEmotionRecognition.predict_emotion_from_file('./Sounds/testrecording.wav')
+    # speechEmotionRecognition.voice_recording('./sounds/test_record.wav')
+    prediction = speechEmotionRecognition.predict_emotion_from_file('./Sounds/test_record.wav')
     speechEmotionRecognition.prediction_to_csv(prediction, "predicted.csv")

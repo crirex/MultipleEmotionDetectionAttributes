@@ -1,4 +1,5 @@
 import wave
+import librosa
 
 
 class Wave:
@@ -17,3 +18,7 @@ class Wave:
         wf.setframerate(self._frame_rate)
         wf.writeframes(b''.join(data))
         wf.close()
+
+    def load_wave(self, filename, sample_rate=16000):
+        y, sr = librosa.core.load(filename, sr=sample_rate, offset=0.5)
+        return y, sr
