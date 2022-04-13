@@ -30,8 +30,8 @@ class AudioPlotter(QChartView):
         self._audio_input_thread = None
         self._buffer = [QPointF(x, 0) for x in range(SAMPLE_COUNT)]
         self._series = QLineSeries()
-        self._chart = QChart()
-        self._chart.addSeries(self._series)
+        self.chart = QChart()
+        self.chart.addSeries(self._series)
 
         self._axis_x = QValueAxis()
         self._axis_x.setRange(0, SAMPLE_COUNT)
@@ -42,13 +42,13 @@ class AudioPlotter(QChartView):
         self._axis_y.setRange(-1, 1)
         self._axis_y.setTitleText("Audio level")
 
-        self._chart.setAxisX(self._axis_x, self._series)
-        self._chart.setAxisY(self._axis_y, self._series)
-        self._chart.legend().hide()
+        self.chart.setAxisX(self._axis_x, self._series)
+        self.chart.setAxisY(self._axis_y, self._series)
+        self.chart.legend().hide()
 
         name = self.device.description()
-        self._chart.setTitle(f"Data from the microphone ({name})")
-        self.setChart(self._chart)
+        self.chart.setTitle(f"Data from the microphone ({name})")
+        self.setChart(self.chart)
         self._series.append(self._buffer)
 
         self._audio_input_plotting = QAudioSource(self.device, get_audio_format(1, 8000, QAudioFormat.UInt8), self)

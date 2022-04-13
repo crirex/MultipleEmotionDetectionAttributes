@@ -7,12 +7,13 @@ import numpy as np
 from scipy.stats import zscore
 
 from utils import Manager
-from utils.Wave import Wave
+from utils.Wave import WaveUtils
 
 
 class VoiceEmotionDetectionThread(QThread):
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
+        self._parent = parent
 
         self._channels = 1
         self._frame_rate = 16000
@@ -63,31 +64,37 @@ class VoiceEmotionDetectionThread(QThread):
             frames_per_buffer=self._frames_per_buffer)
         self._audio_input_stream.start_stream()
 
+        wave_utils = WaveUtils()
         start_time = time.time()
         while self._audio_input_stream.is_active():
             data = self._audio_input_stream.read(self._frames_per_buffer)
             self._frames.append(data)
             end_time = time.time()
             seconds_passed = end_time - start_time
-            if seconds_passed > 3:
+            if seconds_passed > 4:
                 start_time = time.time()
-                print(len(self._frames))
-                list_float_val = [np.frombuffer(frame) for frame in self._frames]
-                print(list_float_val)
+                # data = wave_utils.convert_to_wave(self._frames)
 
-        # that above list is different from the one the is returned by librosa
-        # (I guess when it's saved, the channels and chunks have something to do in that process)
-        filename = "test.wav"
-        Wave().write_wave(filename, self._frames)
-        predictions = self.process_audio(filename)
-        print(predictions)
-        self._frames.clear()
+                # Alternative method until I fix the stuff with reading from byte class
+                import uuid
+                import os
+                file_name = "./Temp/" + str(uuid.uuid4()) + '.wav'
+                wave_utils.write_wave(file_name, self._frames)
+                data, _ = wave_utils.load_wave(file_name)
+                os.remove(file_name)
+                prediction = self.predict_audio(data)
+                self._parent.chart.setTitle(f"Current voice emotion detect as: {prediction[0]}")
+                print(prediction)
+                self._frames.clear()
 
-    def process_audio(self, filename):
+    def process_audio_file(self, filename):
         # load audio file
-        y, sr = Wave().load_wave(filename)
-        if len(y) < self._chunk_size:
-            return
+        y, _ = WaveUtils().load_wave(filename)
+        return self.predict_audio(y)
+
+    def predict_audio(self, y):
+        if y is None or len(y) < self._chunk_size:
+            return None
 
         # preprocess
         chunks = self.frame(y.reshape(1, 1, -1), self._chunk_step, self._chunk_size)
