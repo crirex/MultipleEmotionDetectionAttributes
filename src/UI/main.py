@@ -3,9 +3,9 @@ import sys
 
 import cv2
 import numpy as np
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
+from PySide6.QtCore import QThread
 
-from PySide6.QtGui import QPixmap, QTextCursor
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
 
 from PIL import Image, ImageQt
@@ -34,7 +34,6 @@ sys.excepthook = trap_exc_during_debug
 
 class MainWindow(QMainWindow):
     logger = Logger()
-    sig_abort_workers = pyqtSignal()
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -223,17 +222,14 @@ class MainWindow(QMainWindow):
         self.__threads.append((thread, worker))  # need to store worker too otherwise will be gc'd
         worker.moveToThread(thread)
 
-        # get progress messages from worker:
-        worker.sig_msg.connect(self.logger.log_debug)
-
         # get read to start worker:
         thread.started.connect(worker.work)
         thread.start()  # this will emit 'started' and start thread's event loop
 
-    @pyqtSlot()
     def abort_workers(self):
         self.logger.log_debug('Asking each worker to abort')
         for thread, worker in self.__threads:  # note nice unpacking by Python, avoids indexing
+            worker.abort()
             thread.quit()  # this will quit **as soon as thread event loop unblocks**
             thread.wait()  # <- so you need to wait for it to *actually* quit
 
