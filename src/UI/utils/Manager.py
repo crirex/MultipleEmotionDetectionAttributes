@@ -9,6 +9,8 @@ from utils.Singleton import Singleton
 class Manager(metaclass=Singleton):
 
     def __init__(self):
+        self.app = None
+
         self.video_model = load_model('Models/video.h5', compile=False)
         self.video_predictor_landmarks = dlib.shape_predictor("Models/face_landmarks.dat")
         self.active_camera = cv2.VideoCapture(0)
