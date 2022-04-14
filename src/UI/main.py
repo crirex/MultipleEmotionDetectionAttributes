@@ -18,8 +18,6 @@ from utils.Logger import Logger
 
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
 
-# SET AS GLOBAL WIDGETS
-# ///////////////////////////////////////////////////////////////
 widgets = None
 
 
@@ -32,6 +30,10 @@ def trap_exc_during_debug(*args):
 sys.excepthook = trap_exc_during_debug
 
 
+def log_button_click(button, button_name):
+    MainWindow.logger.log_info(f"{button} - {button_name} panel clicked")
+
+
 class MainWindow(QMainWindow):
     logger = Logger()
 
@@ -40,140 +42,118 @@ class MainWindow(QMainWindow):
         self.__threads = []
         self.face_detection_thread = FaceDetectionThread()
         self.text_to_speech_thread = GoogleSpeechToText(self)
-
-        # SET AS GLOBAL WIDGETS
-        # ///////////////////////////////////////////////////////////////
         self.ui = Ui_MainWindow()
         self.timer = QTimer()
         self.ui.setupUi(self)
         global widgets
         widgets = self.ui
 
-        # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
-        # ///////////////////////////////////////////////////////////////
         Settings.ENABLE_CUSTOM_TITLE_BAR = False
         Settings.THREAD_REFERENCE = self.face_detection_thread
 
-        # APP NAME
-        # ///////////////////////////////////////////////////////////////
         title = "Multimodal Emotion Detection"
-        # APPLY TEXTS
         self.setWindowTitle(title)
 
-        # TOGGLE MENU
-        # ///////////////////////////////////////////////////////////////
         widgets.toggleButton.clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
 
-        # SET UI DEFINITIONS
-        # ///////////////////////////////////////////////////////////////
         UIFunctions.uiDefinitions(self)
 
-        # QTableWidget PARAMETERS
-        # ///////////////////////////////////////////////////////////////
         widgets.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        # BUTTONS CLICK
-        # ///////////////////////////////////////////////////////////////
+        widgets.btn_home.clicked.connect(self.button_click)
+        widgets.btn_widgets.clicked.connect(self.button_click)
+        widgets.btn_new.clicked.connect(self.button_click)
+        widgets.btn_exit.clicked.connect(self.button_click)
 
-        # LEFT MENUS
-        widgets.btn_home.clicked.connect(self.buttonClick)
-        widgets.btn_widgets.clicked.connect(self.buttonClick)
-        widgets.btn_new.clicked.connect(self.buttonClick)
+        widgets.startButton.clicked.connect(self.button_click)
+        widgets.cancelButton.clicked.connect(self.button_click)
 
-        widgets.startButton.clicked.connect(self.buttonClick)
-        widgets.cancelButton.clicked.connect(self.buttonClick)
+        self._button_to_action = {
+            'btn_home': self.button_home_click,
+            'btn_widgets': self.button_reports_click,
+            'btn_new': self.button_recognition_click,
+            'btn_exit': self.button_exit_click,
+            'startButton': self.button_start_recognition_click,
+            'cancelButton': self.button_stop_recognition_click,
+        }
 
-        # EXTRA LEFT BOX
         def openCloseLeftBox():
             UIFunctions.toggleLeftBox(self, True)
 
         widgets.extraCloseColumnBtn.clicked.connect(openCloseLeftBox)
 
-        # EXTRA RIGHT BOX
         def openCloseRightBox():
             UIFunctions.toggleRightBox(self, True)
 
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
 
-        # SHOW APP
-        # ///////////////////////////////////////////////////////////////
         self.show()
 
-        # SET CUSTOM THEME
-        # ///////////////////////////////////////////////////////////////
         useCustomTheme = False
         themeFile = "themes\py_dracula_light.qss"
 
-        # SET THEME AND HACKS
         if useCustomTheme:
-            # LOAD AND APPLY STYLE
             UIFunctions.theme(self, themeFile, True)
 
-            # SET HACKS
             AppFunctions.setThemeHack(self)
 
-        # SET HOME PAGE AND SELECT MENU
-        # ///////////////////////////////////////////////////////////////
         widgets.stackedWidget.setCurrentWidget(widgets.home)
         widgets.btn_home.setStyleSheet(UIFunctions.selectMenu(widgets.btn_home.styleSheet()))
 
-    # BUTTONS CLICK
-    # Post here your functions for clicked buttons
-    # ///////////////////////////////////////////////////////////////
-    def buttonClick(self):
-        # GET BUTTON CLICKED
-        btn = self.sender()
-        btnName = btn.objectName()
+    def change_frame(self, widget, button, button_name):
+        log_button_click(button, button_name)
+        widgets.stackedWidget.setCurrentWidget(widget)
+        UIFunctions.resetStyle(self, button_name)
+        button.setStyleSheet(UIFunctions.selectMenu(button.styleSheet()))
 
-        # SHOW HOME PAGE
-        if btnName == "btn_home":
-            widgets.stackedWidget.setCurrentWidget(widgets.home)
-            UIFunctions.resetStyle(self, btnName)
-            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+    def button_home_click(self, button, button_name):
+        self.change_frame(widgets.home, button, button_name)
 
-        # SHOW WIDGETS PAGE
-        if btnName == "btn_widgets":
-            widgets.stackedWidget.setCurrentWidget(widgets.widgets)
-            UIFunctions.resetStyle(self, btnName)
-            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+    def button_reports_click(self, button, button_name):
+        self.change_frame(widgets.widgets, button, button_name)
 
-        # SHOW NEW PAGE
-        if btnName == "btn_new":
-            MainWindow.logger.log_info("Emotion recognition panel clicked")
-            widgets.stackedWidget.setCurrentWidget(widgets.new_page)  # SET PAGE
-            UIFunctions.resetStyle(self, btnName)  # RESET ANOTHERS BUTTONS SELECTED
-            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
+    def button_recognition_click(self, button, button_name):
+        self.change_frame(widgets.new_page, button, button_name)
 
-        if btnName == "startButton":
-            MainWindow.logger.log_info("Start emotion recognition")
+    def button_exit_click(self, button, button_name):
+        log_button_click(button, button_name)
+        self.close()
 
-            # Video
-            self.timer.timeout.connect(self.display_video_stream)
-            self.timer.start(30)
+    def button_start_recognition_click(self, button, button_name):
+        log_button_click(button, button_name)
+        MainWindow.logger.log_info("Starting emotion recognition")
 
-            # Audio
-            self.ui.audioPlotterWidget.start_recording()
+        # Video
+        self.timer.timeout.connect(self.display_video_stream)
+        self.timer.start(30)
 
-            # SpeechToText
-            self.timer.timeout.connect(self.display_text_from_speech)
-            self.timer.start(30)
+        # Audio
+        self.ui.audioPlotterWidget.start_recording()
 
-            self.start_thread(self.face_detection_thread, "face_detection_thread")
-            self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
-            print("after thread")
+        # SpeechToText
+        self.timer.timeout.connect(self.display_text_from_speech)
+        self.timer.start(30)
 
-        if btnName == "cancelButton":
-            MainWindow.logger.log_info("Stop emotion recognition")
+        self.start_thread(self.face_detection_thread, "face_detection_thread")
+        self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
 
-            # Video
-            self.timer.stop()
-            self.face_detection_thread.stop_running()
+    def button_stop_recognition_click(self, button, button_name):
+        log_button_click(button, button_name)
+        MainWindow.logger.log_info("Stop emotion recognition")
 
-            # Audio
-            self.ui.audioPlotterWidget.stop_recording()
+        # Video
+        self.timer.stop()
+        self.face_detection_thread.stop_running()
 
-        # PRINT BTN NAME
-        print(f'Button "{btnName}" pressed!')
+        # Audio
+        self.ui.audioPlotterWidget.stop_recording()
+
+    def button_click(self):
+        button = self.sender()
+        button_name = button.objectName()
+
+        if button_name in self._button_to_action:
+            self._button_to_action[button_name](button, button_name)
 
     def display_text_from_speech(self):
         new_text = self.text_to_speech_thread.get_new_text()
@@ -192,14 +172,6 @@ class MainWindow(QMainWindow):
         pm = QPixmap.fromImage(qim)
         self.ui.labelVideo.setPixmap(pm)
 
-    # RESIZE EVENTS
-    # ///////////////////////////////////////////////////////////////
-    def resizeEvent(self, event):
-        # Update Size Grips
-        UIFunctions.resize_grips(self)
-
-    # MOUSE CLICK EVENTS
-    # ///////////////////////////////////////////////////////////////
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW
         self.dragPos = event.globalPos()
