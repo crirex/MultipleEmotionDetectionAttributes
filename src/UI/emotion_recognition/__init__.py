@@ -1,1 +1,2 @@
 from .FaceDetectionThread import FaceDetectionThread
+from .VoiceEmotionDetectionThread import VoiceEmotionDetectionThread

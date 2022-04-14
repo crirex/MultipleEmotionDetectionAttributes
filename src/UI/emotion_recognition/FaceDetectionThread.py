@@ -1,6 +1,7 @@
 import cv2
 import dlib
 import numpy as np
+from PySide6.QtCore import QObject
 
 from scipy.ndimage import zoom
 from scipy.spatial import distance
@@ -8,9 +9,7 @@ from imutils import face_utils
 from PIL import Image
 
 from PySide6.QtWidgets import QMessageBox
-from PySide6.QtCore import QThread
 
-from utils.observer import Subject
 from utils.Logger import Logger
 from utils.Manager import Manager
 
@@ -27,11 +26,12 @@ def is_face_detected(face):
     return face.shape[0] != 0 and face.shape[1] != 0
 
 
-class FaceDetectionThread(QThread):
+class FaceDetectionThread(QObject):
     def __init__(self, parent=None):
-        QThread.__init__(self, parent)
+        super().__init__()
         self._calling_window = parent
         self._is_running = True
+        self._abort = False
         self._logger = Logger()
 
         self._shape_x = 48
@@ -249,8 +249,8 @@ class FaceDetectionThread(QThread):
         cv2.drawContours(image=frame, contours=[eblHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
         cv2.drawContours(image=frame, contours=[ebrHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
-    def run(self):
-        if self._manager.activeCamera is None or not self._manager.activeCamera.isOpened():
+    def work(self):
+        if self._manager.active_camera is None or not self._manager.active_camera.isOpened():
             QMessageBox.warning(None, "Video", "There is no video input device available.")
             self._calling_window.ui.labelVideo.setText("No camera detected")
             return
@@ -259,13 +259,13 @@ class FaceDetectionThread(QThread):
 
         try:
             while self._is_running:
-                _, frame = self._manager.activeCamera.read()
+                _, frame = self._manager.active_camera.read()
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 rects = self._face_detect(gray, 0)
 
                 if len(rects):
-                    shape_img = self._manager.videoPredictorLandmarks(gray, rects[0])
+                    shape_img = self._manager.video_predictor_landmarks(gray, rects[0])
                     shape = face_utils.shape_to_np(shape_img)
 
                     (x, y, width, height) = face_utils.rect_to_bb(rects[0])
@@ -286,7 +286,7 @@ class FaceDetectionThread(QThread):
                     face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
                     # Make Prediction
-                    prediction = self._manager.videoModel.predict(face)
+                    prediction = self._manager.video_model.predict(face)
 
                     self.drawPredictions(frame, prediction)
                     self.drawRectangle(frame, x, y, width, height)
@@ -307,5 +307,9 @@ class FaceDetectionThread(QThread):
         except Exception as ex:
             self._logger.log_error(ex)
             self._is_running = False
-            self._manager.activeCamera.release()
+            self._manager.active_camera.release()
             raise Exception(ex)
+
+    def abort(self):
+        self._abort = True
+        self._is_running = False
