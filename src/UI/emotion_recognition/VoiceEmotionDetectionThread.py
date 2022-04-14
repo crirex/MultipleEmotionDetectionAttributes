@@ -73,7 +73,7 @@ class VoiceEmotionDetectionThread(QThread):
                 start_time = time.time()
                 print(len(self._frames))
                 list_float_val = [np.frombuffer(frame) for frame in self._frames]
-                # print(list_float_val)
+                print(list_float_val)
 
         # that above list is different from the one the is returned by librosa
         # (I guess when it's saved, the channels and chunks have something to do in that process)
