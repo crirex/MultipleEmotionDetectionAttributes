@@ -43,11 +43,9 @@ class MainWindow(QMainWindow):
 
         # APP NAME
         # ///////////////////////////////////////////////////////////////
-        title = "Multimodal emotion detection"
-        description = "TO DO"
+        title = "Multimodal Emotion Detection"
         # APPLY TEXTS
         self.setWindowTitle(title)
-        widgets.titleRightInfo.setText(description)
 
         # TOGGLE MENU
         # ///////////////////////////////////////////////////////////////
@@ -68,7 +66,6 @@ class MainWindow(QMainWindow):
         widgets.btn_home.clicked.connect(self.buttonClick)
         widgets.btn_widgets.clicked.connect(self.buttonClick)
         widgets.btn_new.clicked.connect(self.buttonClick)
-        widgets.btn_save.clicked.connect(self.buttonClick)
 
         widgets.startButton.clicked.connect(self.buttonClick)
         widgets.cancelButton.clicked.connect(self.buttonClick)
@@ -77,7 +74,6 @@ class MainWindow(QMainWindow):
         def openCloseLeftBox():
             UIFunctions.toggleLeftBox(self, True)
 
-        widgets.toggleLeftBox.clicked.connect(openCloseLeftBox)
         widgets.extraCloseColumnBtn.clicked.connect(openCloseLeftBox)
 
         # EXTRA RIGHT BOX
@@ -158,9 +154,6 @@ class MainWindow(QMainWindow):
 
             # Audio
             self.ui.audioPlotterWidget.stop_recording()
-
-        if btnName == "btn_save":
-            print("Save BTN clicked!")
 
         # PRINT BTN NAME
         print(f'Button "{btnName}" pressed!')
