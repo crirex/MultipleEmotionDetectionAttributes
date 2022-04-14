@@ -1,6 +1,7 @@
 import cv2
 import dlib
 import numpy as np
+from PySide6.QtCore import QObject
 
 from scipy.ndimage import zoom
 from scipy.spatial import distance
@@ -8,7 +9,6 @@ from imutils import face_utils
 from PIL import Image
 
 from PySide6.QtWidgets import QMessageBox
-from PySide6.QtCore import QThread
 
 from utils.Logger import Logger
 from utils.Manager import Manager
@@ -26,11 +26,12 @@ def is_face_detected(face):
     return face.shape[0] != 0 and face.shape[1] != 0
 
 
-class FaceDetectionThread(QThread):
+class FaceDetectionThread(QObject):
     def __init__(self, parent=None):
-        QThread.__init__(self, parent)
+        super().__init__()
         self._calling_window = parent
         self._is_running = True
+        self._abort = False
         self._logger = Logger()
 
         self._shape_x = 48
@@ -248,7 +249,7 @@ class FaceDetectionThread(QThread):
         cv2.drawContours(image=frame, contours=[eblHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
         cv2.drawContours(image=frame, contours=[ebrHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
-    def run(self):
+    def work(self):
         if self._manager.active_camera is None or not self._manager.active_camera.isOpened():
             QMessageBox.warning(None, "Video", "There is no video input device available.")
             self._calling_window.ui.labelVideo.setText("No camera detected")
@@ -308,3 +309,7 @@ class FaceDetectionThread(QThread):
             self._is_running = False
             self._manager.active_camera.release()
             raise Exception(ex)
+
+    def abort(self):
+        self._abort = True
+        self._is_running = False

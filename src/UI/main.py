@@ -3,6 +3,7 @@ import sys
 
 import cv2
 import numpy as np
+from PySide6.QtCore import QThread
 
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
@@ -11,6 +12,8 @@ from PIL import Image, ImageQt
 
 from emotion_recognition import FaceDetectionThread
 from modules import *
+from speech_to_text import GoogleSpeechToText
+from utils import Manager
 from utils.Logger import Logger
 
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
@@ -20,13 +23,23 @@ os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100
 widgets = None
 
 
+def trap_exc_during_debug(*args):
+    # when app raises uncaught exception, print info
+    print(args)
+
+
+# install exception hook: without this, uncaught exception would cause application to exit
+sys.excepthook = trap_exc_during_debug
+
+
 class MainWindow(QMainWindow):
     logger = Logger()
 
     def __init__(self):
         QMainWindow.__init__(self)
-
-        self.face_detection_thread = FaceDetectionThread(self)
+        self.__threads = []
+        self.face_detection_thread = FaceDetectionThread()
+        self.text_to_speech_thread = GoogleSpeechToText(self)
 
         # SET AS GLOBAL WIDGETS
         # ///////////////////////////////////////////////////////////////
@@ -126,7 +139,6 @@ class MainWindow(QMainWindow):
 
         # SHOW NEW PAGE
         if btnName == "btn_new":
-
             MainWindow.logger.log_info("Emotion recognition panel clicked")
             widgets.stackedWidget.setCurrentWidget(widgets.new_page)  # SET PAGE
             UIFunctions.resetStyle(self, btnName)  # RESET ANOTHERS BUTTONS SELECTED
@@ -142,8 +154,13 @@ class MainWindow(QMainWindow):
             # Audio
             self.ui.audioPlotterWidget.start_recording()
 
-            # must be at final, IDK if it blocks main thread or something ...
-            self.face_detection_thread.run()
+            # SpeechToText
+            self.timer.timeout.connect(self.display_text_from_speech)
+            self.timer.start(30)
+
+            self.start_thread(self.face_detection_thread, "face_detection_thread")
+            self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
+            print("after thread")
 
         if btnName == "cancelButton":
             MainWindow.logger.log_info("Stop emotion recognition")
@@ -157,6 +174,12 @@ class MainWindow(QMainWindow):
 
         # PRINT BTN NAME
         print(f'Button "{btnName}" pressed!')
+
+    def display_text_from_speech(self):
+        new_text = self.text_to_speech_thread.get_new_text()
+        if new_text is not None:
+            print(new_text)
+            self.ui.emotioTextEdit.appendPlainText(new_text + ". ")
 
     def display_video_stream(self):
         frame = self.face_detection_thread.get_frame()
@@ -187,11 +210,32 @@ class MainWindow(QMainWindow):
         if event.buttons() == Qt.RightButton:
             print('Mouse click: RIGHT CLICK')
 
+    def start_thread(self, worker, name):
+        thread = QThread()
+        thread.setObjectName('thread_' + name)
+        self.__threads.append((thread, worker))  # need to store worker too otherwise will be gc'd
+        worker.moveToThread(thread)
+
+        # get read to start worker:
+        thread.started.connect(worker.work)
+        thread.start()  # this will emit 'started' and start thread's event loop
+
+    def abort_workers(self):
+        self.logger.log_debug('Asking each worker to abort')
+        for thread, worker in self.__threads:  # note nice unpacking by Python, avoids indexing
+            worker.abort()
+            thread.quit()  # this will quit **as soon as thread event loop unblocks**
+            thread.wait()  # <- so you need to wait for it to *actually* quit
+
+        # even though threads have exited, there may still be messages on the main thread's
+        # queue (messages that threads emitted before the abort):
+        self.logger.log_debug('All threads exited')
+
 
 if __name__ == "__main__":
     MainWindow.logger.log_info("Application starts")
 
-    app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("icon.ico"))
+    Manager.app = QApplication(sys.argv)
+    Manager.app.setWindowIcon(QIcon("icon.ico"))
     window = MainWindow()
-    sys.exit(app.exec())
+    sys.exit(Manager.app.exec())
