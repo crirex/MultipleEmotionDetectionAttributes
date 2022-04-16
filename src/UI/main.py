@@ -9,12 +9,14 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
 
 from PIL import Image, ImageQt
+from transitions import MachineError
 
 from emotion_recognition import FaceDetectionThread
 from modules import *
 from speech_to_text import GoogleSpeechToText
 from utils import Manager
 from utils.Logger import Logger
+from utils.StateManager import StateManager
 
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
 
@@ -45,6 +47,8 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.timer = QTimer()
         self.ui.setupUi(self)
+        self._state_manager = StateManager(self)
+
         global widgets
         widgets = self.ui
 
@@ -107,46 +111,79 @@ class MainWindow(QMainWindow):
         button.setStyleSheet(UIFunctions.selectMenu(button.styleSheet()))
 
     def button_home_click(self, button, button_name):
-        self.change_frame(widgets.home, button, button_name)
+        try:
+            self._state_manager.button_home_clicked()
+            self.change_frame(widgets.home, button, button_name)
+        except MachineError as machine_error:
+            MainWindow.logger.log_warning(machine_error.value)
+        except Exception as exception:
+            MainWindow.logger.log_error(exception.value)
 
     def button_reports_click(self, button, button_name):
-        self.change_frame(widgets.widgets, button, button_name)
+        try:
+            self._state_manager.button_reports_clicked()
+            self.change_frame(widgets.widgets, button, button_name)
+        except MachineError as machine_error:
+            MainWindow.logger.log_warning(machine_error.value)
+        except Exception as exception:
+            MainWindow.logger.log_error(exception.value)
 
     def button_recognition_click(self, button, button_name):
-        self.change_frame(widgets.new_page, button, button_name)
+        try:
+            self._state_manager.button_recognition_clicked()
+            self.change_frame(widgets.new_page, button, button_name)
+        except MachineError as machine_error:
+            MainWindow.logger.log_warning(machine_error.value)
+        except Exception as exception:
+            MainWindow.logger.log_error(exception.value)
 
     def button_exit_click(self, button, button_name):
         log_button_click(button, button_name)
         self.close()
 
     def button_start_recognition_click(self, button, button_name):
-        log_button_click(button, button_name)
-        MainWindow.logger.log_info("Starting emotion recognition")
+        try:
+            self._state_manager.button_start_recognition_clicked()
+            log_button_click(button, button_name)
+            MainWindow.logger.log_info("Starting emotion recognition")
 
-        # Video
-        self.timer.timeout.connect(self.display_video_stream)
-        self.timer.start(30)
+            # Video
+            self.timer.timeout.connect(self.display_video_stream)
+            self.timer.start(30)
 
-        # Audio
-        self.ui.audioPlotterWidget.start_recording()
+            # Audio
+            self.ui.audioPlotterWidget.start_recording()
 
-        # SpeechToText
-        self.timer.timeout.connect(self.display_text_from_speech)
-        self.timer.start(30)
+            # SpeechToText
+            self.timer.timeout.connect(self.display_text_from_speech)
+            self.timer.start(30)
 
-        self.start_thread(self.face_detection_thread, "face_detection_thread")
-        self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
+            self.start_thread(self.face_detection_thread, "face_detection_thread")
+            self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
+        except MachineError as machine_error:
+            MainWindow.logger.log_warning(machine_error.value)
+        except Exception as exception:
+            MainWindow.logger.log_error(exception.value)
 
     def button_stop_recognition_click(self, button, button_name):
-        log_button_click(button, button_name)
-        MainWindow.logger.log_info("Stop emotion recognition")
+        try:
+            self._state_manager.button_stop_recognition_clicked()
+            log_button_click(button, button_name)
+            MainWindow.logger.log_info("Stop emotion recognition")
 
-        # Video
-        self.timer.stop()
-        self.face_detection_thread.stop_running()
+            # Video
+            self.timer.stop()
+            self.face_detection_thread.stop_running()
 
-        # Audio
-        self.ui.audioPlotterWidget.stop_recording()
+            # Audio
+            self.ui.audioPlotterWidget.stop_recording()
+
+            # After the report has been generated
+            self._state_manager.report_generated()
+        except MachineError as machine_error:
+            MainWindow.logger.log_warning(machine_error.value)
+        except Exception as exception:
+            MainWindow.logger.log_error(exception.value)
 
     def button_click(self):
         button = self.sender()
@@ -154,6 +191,7 @@ class MainWindow(QMainWindow):
 
         if button_name in self._button_to_action:
             self._button_to_action[button_name](button, button_name)
+            print(self._state_manager.state)
 
     def display_text_from_speech(self):
         new_text = self.text_to_speech_thread.get_new_text()
@@ -171,16 +209,6 @@ class MainWindow(QMainWindow):
         qim = ImageQt.ImageQt(img)
         pm = QPixmap.fromImage(qim)
         self.ui.labelVideo.setPixmap(pm)
-
-    def mousePressEvent(self, event):
-        # SET DRAG POS WINDOW
-        self.dragPos = event.globalPos()
-
-        # PRINT MOUSE EVENTS
-        if event.buttons() == Qt.LeftButton:
-            print('Mouse click: LEFT CLICK')
-        if event.buttons() == Qt.RightButton:
-            print('Mouse click: RIGHT CLICK')
 
     def start_thread(self, worker, name):
         thread = QThread()

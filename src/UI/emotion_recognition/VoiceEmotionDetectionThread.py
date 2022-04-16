@@ -87,11 +87,11 @@ class VoiceEmotionDetectionThread(QThread):
                     os.remove(file_name)
 
                     prediction = self.predict_audio(data)[0]
-                    self._parent.chart.setTitle(f"Current voice emotion detect as: {prediction}")
+                    str_prediction = f"Current voice emotion detect as: {prediction}"
+                    self._parent.chart.setTitle(str_prediction)
 
-                    print(prediction)
+                    print(str_prediction)
                     self._predicted_frames.append((self._frames, prediction))
-                    print(len(self._predicted_frames))
                     self._frames.clear()
         except Exception as ex:
             self._logger.log_error(ex)
