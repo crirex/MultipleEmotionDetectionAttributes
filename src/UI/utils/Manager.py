@@ -22,3 +22,17 @@ class Manager(metaclass=Singleton):
         _, _ = self.active_camera.read()  # Actually opening up the camera
         _ = self.video_model.predict(np.zeros((1, 48, 48, 1)))  # False prediction for spike lag
         _ = self.audio_model.predict(np.zeros((1, 5, 128, 128, 1)))
+
+    def is_camera_available(self):
+        if self.active_camera is None or not self.active_camera.isOpened():
+            return False
+        return True
+
+    def release_resources(self):
+        if self.is_camera_available():
+            self.active_camera.release()
+            self.active_camera = None
+
+    def quit_app(self):
+        if self.app is not None:
+            self.app.quit()

@@ -64,6 +64,9 @@ class FaceDetectionThread(QObject):
     def stop_running(self):
         self._is_running = False
 
+        self._manager.active_camera.release()
+        self._manager.active_camera = None
+
     def get_frame(self):
         if len(self._frames) > 0:
             return self._frames.pop(0)
@@ -250,6 +253,9 @@ class FaceDetectionThread(QObject):
         cv2.drawContours(image=frame, contours=[ebrHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
     def work(self):
+        if not self._manager.is_camera_available():
+            self._manager.active_camera = cv2.VideoCapture(0)
+
         if self._manager.active_camera is None or not self._manager.active_camera.isOpened():
             QMessageBox.warning(None, "Video", "There is no video input device available.")
             self._calling_window.ui.labelVideo.setText("No camera detected")

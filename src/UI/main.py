@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
         self.timer = QTimer()
         self.ui.setupUi(self)
         self._state_manager = StateManager(self)
+        self._manager = Manager()
 
         global widgets
         widgets = self.ui
@@ -71,6 +72,7 @@ class MainWindow(QMainWindow):
 
         widgets.startButton.clicked.connect(self.button_click)
         widgets.cancelButton.clicked.connect(self.button_click)
+        widgets.pauseButton.clicked.connect(self.button_click)
 
         self._button_to_action = {
             'btn_home': self.button_home_click,
@@ -79,6 +81,7 @@ class MainWindow(QMainWindow):
             'btn_exit': self.button_exit_click,
             'startButton': self.button_start_recognition_click,
             'cancelButton': self.button_stop_recognition_click,
+            'pauseButton': self.button_pause_recognition_click
         }
 
         def openCloseLeftBox():
@@ -111,87 +114,78 @@ class MainWindow(QMainWindow):
         button.setStyleSheet(UIFunctions.selectMenu(button.styleSheet()))
 
     def button_home_click(self, button, button_name):
-        try:
-            self._state_manager.button_home_clicked()
-            self.change_frame(widgets.home, button, button_name)
-        except MachineError as machine_error:
-            MainWindow.logger.log_warning(machine_error.value)
-        except Exception as exception:
-            MainWindow.logger.log_error(exception.value)
+        self._state_manager.button_home_clicked()
+        self.change_frame(widgets.home, button, button_name)
 
     def button_reports_click(self, button, button_name):
-        try:
-            self._state_manager.button_reports_clicked()
-            self.change_frame(widgets.widgets, button, button_name)
-        except MachineError as machine_error:
-            MainWindow.logger.log_warning(machine_error.value)
-        except Exception as exception:
-            MainWindow.logger.log_error(exception.value)
+        self._state_manager.button_reports_clicked()
+        self.change_frame(widgets.widgets, button, button_name)
 
     def button_recognition_click(self, button, button_name):
-        try:
-            self._state_manager.button_recognition_clicked()
-            self.change_frame(widgets.new_page, button, button_name)
-        except MachineError as machine_error:
-            MainWindow.logger.log_warning(machine_error.value)
-        except Exception as exception:
-            MainWindow.logger.log_error(exception.value)
+        self._state_manager.button_recognition_clicked()
+        self.change_frame(widgets.new_page, button, button_name)
 
     def button_exit_click(self, button, button_name):
+        self._state_manager.button_exit_clicked()
         log_button_click(button, button_name)
+        self._manager.release_resources()
+        self._manager.quit_app()
         self.close()
 
     def button_start_recognition_click(self, button, button_name):
-        try:
-            self._state_manager.button_start_recognition_clicked()
-            log_button_click(button, button_name)
-            MainWindow.logger.log_info("Starting emotion recognition")
+        self._state_manager.button_start_recognition_clicked()
+        log_button_click(button, button_name)
+        MainWindow.logger.log_info("Starting emotion recognition")
 
-            # Video
-            self.timer.timeout.connect(self.display_video_stream)
-            self.timer.start(30)
+        # Video
+        self.timer.timeout.connect(self.display_video_stream)
+        self.timer.start(30)
 
-            # Audio
-            self.ui.audioPlotterWidget.start_recording()
+        # Audio
+        self.ui.audioPlotterWidget.start_recording()
 
-            # SpeechToText
-            self.timer.timeout.connect(self.display_text_from_speech)
-            self.timer.start(30)
+        # SpeechToText
+        self.timer.timeout.connect(self.display_text_from_speech)
+        self.timer.start(30)
 
-            self.start_thread(self.face_detection_thread, "face_detection_thread")
-            self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
-        except MachineError as machine_error:
-            MainWindow.logger.log_warning(machine_error.value)
-        except Exception as exception:
-            MainWindow.logger.log_error(exception.value)
+        self.start_thread(self.face_detection_thread, "face_detection_thread")
+        self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
 
     def button_stop_recognition_click(self, button, button_name):
-        try:
-            self._state_manager.button_stop_recognition_clicked()
-            log_button_click(button, button_name)
-            MainWindow.logger.log_info("Stop emotion recognition")
+        self._state_manager.button_stop_recognition_clicked()
+        log_button_click(button, button_name)
+        MainWindow.logger.log_info("Stop emotion recognition")
 
-            # Video
-            self.timer.stop()
-            self.face_detection_thread.stop_running()
+        # Video
+        self.timer.stop()
+        self.face_detection_thread.stop_running()
 
-            # Audio
-            self.ui.audioPlotterWidget.stop_recording()
+        # Audio
+        self.ui.audioPlotterWidget.stop_recording()
 
-            # After the report has been generated
-            self._state_manager.report_generated()
-        except MachineError as machine_error:
-            MainWindow.logger.log_warning(machine_error.value)
-        except Exception as exception:
-            MainWindow.logger.log_error(exception.value)
+        # After the report has been generated
+        self._state_manager.report_generated()
+
+    def button_pause_recognition_click(self, button, button_name):
+        self._state_manager.button_pause_recognition_clicked()
+        log_button_click(button, button_name)
+        MainWindow.logger.log_info("Pause emotion recognition")
+
+        # TO DO: implement a way to hide voice and face prediction
+        # ...
 
     def button_click(self):
         button = self.sender()
         button_name = button.objectName()
 
         if button_name in self._button_to_action:
-            self._button_to_action[button_name](button, button_name)
-            print(self._state_manager.state)
+            try:
+                self._button_to_action[button_name](button, button_name)
+                print(self._state_manager.state)
+            except MachineError as machine_error:
+                MainWindow.logger.log_warning(machine_error.value)
+            except Exception as exception:
+                MainWindow.logger.log_error(exception.value)
 
     def display_text_from_speech(self):
         new_text = self.text_to_speech_thread.get_new_text()
