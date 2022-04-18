@@ -30,7 +30,8 @@ class FaceDetectionThread(QObject):
     def __init__(self, parent=None):
         super().__init__()
         self._calling_window = parent
-        self._is_running = True
+        self._is_running = False
+        self._is_paused = False
         self._abort = False
         self._logger = Logger()
 
@@ -62,36 +63,18 @@ class FaceDetectionThread(QObject):
         self._frames = []
 
     def stop_running(self):
-        self._is_running = False
+        self._is_running = self._is_paused = False
 
-        self._manager.active_camera.release()
-        self._manager.active_camera = None
+    def pause_running(self):
+        self._is_paused = True
+
+    def resume_running(self):
+        self._is_paused = False
 
     def get_frame(self):
         if len(self._frames) > 0:
             return self._frames.pop(0)
         return None
-
-    def detect_face(self, frame):
-
-        # Cascade classifier pre-trained model
-        faceCascade = cv2.CascadeClassifier('Models/face_landmarks.dat')
-
-        # BGR -> Gray conversion
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Cascade MultiScale classifier
-        detected_faces = faceCascade.detectMultiScale(image=gray, scaleFactor=1.1, minNeighbors=6,
-                                                      minSize=(self._shape_x, self._shape_y),
-                                                      flags=cv2.CASCADE_SCALE_IMAGE)
-        coord = []
-
-        for x, y, w, h in detected_faces:
-            if w > 100:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 1)
-                coord.append([x, y, w, h])
-
-        return gray, detected_faces, coord
 
     def has_glasses(self, shape, frame):
         landmarks = np.array([[p.x, p.y] for p in shape.parts()])
@@ -254,14 +237,12 @@ class FaceDetectionThread(QObject):
 
     def work(self):
         if not self._manager.is_camera_available():
-            self._manager.active_camera = cv2.VideoCapture(0)
-
-        if self._manager.active_camera is None or not self._manager.active_camera.isOpened():
-            QMessageBox.warning(None, "Video", "There is no video input device available.")
+            # QMessageBox.warning(self._calling_window, "Video", "There is no video input device available.")
             self._calling_window.ui.labelVideo.setText("No camera detected")
             return
 
         self._is_running = True
+        self._is_paused = False
 
         try:
             while self._is_running:
@@ -270,7 +251,7 @@ class FaceDetectionThread(QObject):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 rects = self._face_detect(gray, 0)
 
-                if len(rects):
+                if len(rects) and not self._is_paused:
                     shape_img = self._manager.video_predictor_landmarks(gray, rects[0])
                     shape = face_utils.shape_to_np(shape_img)
 

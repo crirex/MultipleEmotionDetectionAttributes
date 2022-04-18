@@ -32,17 +32,13 @@ def trap_exc_during_debug(*args):
 sys.excepthook = trap_exc_during_debug
 
 
-def log_button_click(button, button_name):
-    MainWindow.logger.log_info(f"{button} - {button_name} panel clicked")
-
-
 class MainWindow(QMainWindow):
     logger = Logger()
 
     def __init__(self):
         QMainWindow.__init__(self)
         self.__threads = []
-        self.face_detection_thread = FaceDetectionThread()
+        self.face_detection_thread = FaceDetectionThread(self)
         self.text_to_speech_thread = GoogleSpeechToText(self)
         self.ui = Ui_MainWindow()
         self.timer = QTimer()
@@ -107,42 +103,28 @@ class MainWindow(QMainWindow):
         widgets.stackedWidget.setCurrentWidget(widgets.home)
         widgets.btn_home.setStyleSheet(UIFunctions.selectMenu(widgets.btn_home.styleSheet()))
 
-    def change_frame(self, widget, button, button_name):
-        log_button_click(button, button_name)
-        widgets.stackedWidget.setCurrentWidget(widget)
-        UIFunctions.resetStyle(self, button_name)
-        button.setStyleSheet(UIFunctions.selectMenu(button.styleSheet()))
-
     def button_home_click(self, button, button_name):
-        self._state_manager.button_home_clicked()
-        self.change_frame(widgets.home, button, button_name)
+        self._state_manager.button_home_clicked(button, button_name, widgets.home)
 
     def button_reports_click(self, button, button_name):
-        self._state_manager.button_reports_clicked()
-        self.change_frame(widgets.widgets, button, button_name)
+        self._state_manager.button_reports_clicked(button, button_name, widgets.widgets)
 
     def button_recognition_click(self, button, button_name):
-        self._state_manager.button_recognition_clicked()
-        self.change_frame(widgets.new_page, button, button_name)
+        self._state_manager.button_recognition_clicked(button, button_name, widgets.new_page)
 
     def button_exit_click(self, button, button_name):
-        self._state_manager.button_exit_clicked()
-        log_button_click(button, button_name)
-        self._manager.release_resources()
-        self._manager.quit_app()
-        self.close()
+        self._state_manager.button_exit_clicked(button, button_name)
 
     def button_start_recognition_click(self, button, button_name):
-        self._state_manager.button_start_recognition_clicked()
-        log_button_click(button, button_name)
-        MainWindow.logger.log_info("Starting emotion recognition")
+        self._state_manager.button_start_recognition_clicked(button, button_name)
 
+    def start_recognition(self):
         # Video
         self.timer.timeout.connect(self.display_video_stream)
         self.timer.start(30)
 
         # Audio
-        self.ui.audioPlotterWidget.start_recording()
+        self.ui.audioPlotterWidget.start_prediction()
 
         # SpeechToText
         self.timer.timeout.connect(self.display_text_from_speech)
@@ -151,28 +133,29 @@ class MainWindow(QMainWindow):
         self.start_thread(self.face_detection_thread, "face_detection_thread")
         self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
 
-    def button_stop_recognition_click(self, button, button_name):
-        self._state_manager.button_stop_recognition_clicked()
-        log_button_click(button, button_name)
-        MainWindow.logger.log_info("Stop emotion recognition")
+    def resume_recognition(self):
+        self.face_detection_thread.resume_running()
+        self.ui.audioPlotterWidget.resume_prediction()
 
+    def button_stop_recognition_click(self, button, button_name):
+        self._state_manager.button_stop_recognition_clicked(button, button_name)
+
+    def stop_recognition(self):
         # Video
         self.timer.stop()
         self.face_detection_thread.stop_running()
 
         # Audio
-        self.ui.audioPlotterWidget.stop_recording()
-
-        # After the report has been generated
-        self._state_manager.report_generated()
+        self.ui.audioPlotterWidget.stop_prediction()
 
     def button_pause_recognition_click(self, button, button_name):
-        self._state_manager.button_pause_recognition_clicked()
-        log_button_click(button, button_name)
-        MainWindow.logger.log_info("Pause emotion recognition")
+        self._state_manager.button_pause_recognition_clicked(button, button_name)
 
-        # TO DO: implement a way to hide voice and face prediction
-        # ...
+        self.pause_recognition()
+
+    def pause_recognition(self):
+        self.face_detection_thread.pause_running()
+        self.ui.audioPlotterWidget.pause_prediction()
 
     def button_click(self):
         button = self.sender()
@@ -224,6 +207,12 @@ class MainWindow(QMainWindow):
         # even though threads have exited, there may still be messages on the main thread's
         # queue (messages that threads emitted before the abort):
         self.logger.log_debug('All threads exited')
+
+    def reset_style(self, button_name):
+        UIFunctions.resetStyle(self, button_name)
+
+    def select_menu_style(self, button):
+        return UIFunctions.selectMenu(button.styleSheet())
 
 
 if __name__ == "__main__":

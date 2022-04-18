@@ -55,16 +55,22 @@ class AudioPlotter(QChartView):
 
         self._audio_recording_thread = VoiceEmotionDetectionThread(self)
 
-    def start_recording(self):
+    def start_prediction(self):
         self._io_device_plotting = self._audio_input_plotting.start()
         self._io_device_plotting.readyRead.connect(self._readyRead)
 
         self._audio_recording_thread.start()
 
-    def stop_recording(self):
+    def stop_prediction(self):
         if self._audio_input_plotting is not None:
             self._audio_input_plotting.stop()
-            self._audio_recording_thread.stop_recording()
+            self._audio_recording_thread.stop_prediction()
+
+    def pause_prediction(self):
+        self._audio_recording_thread.pause_prediction()
+
+    def resume_prediction(self):
+        self._audio_recording_thread.resume_prediction()
 
     def closeEvent(self, event):
         self.stop_recording()
