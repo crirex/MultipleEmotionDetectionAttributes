@@ -1,3 +1,4 @@
+from reports import DataStoreManager
 from utils import Singleton, Logger, Manager
 from transitions import Machine
 
@@ -19,6 +20,7 @@ class StateManager(metaclass=Singleton):
         widgets = self._main_window.ui
 
         self._manager = Manager()
+        self._data_store_manager = DataStoreManager()
 
         self._state_machine = Machine(model=self, states=StateManager.states, initial='Home')
 
@@ -101,3 +103,4 @@ class StateManager(metaclass=Singleton):
 
     def after_report_generated(self):
         print("Report generated ! going back to initial Recognition state")
+        # print(self._data_store_manager.video_predictions)

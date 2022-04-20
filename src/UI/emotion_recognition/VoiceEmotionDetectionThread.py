@@ -1,4 +1,4 @@
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QObject
 
 import time
 import librosa
@@ -12,9 +12,9 @@ from utils import Manager, Logger
 from utils.Wave import WaveUtils
 
 
-class VoiceEmotionDetectionThread(QThread):
+class VoiceEmotionDetectionThread(QObject):
     def __init__(self, parent=None):
-        QThread.__init__(self, parent)
+        super().__init__()
         self._parent = parent
         self._logger = Logger()
 
@@ -62,7 +62,7 @@ class VoiceEmotionDetectionThread(QThread):
 
         return np.asarray(mel_spect)
 
-    def run(self):
+    def work(self):
         self._is_paused = False
         self._audio_input_stream = self._pyAudioObject.open(
             format=pyaudio.paInt16,
@@ -104,7 +104,7 @@ class VoiceEmotionDetectionThread(QThread):
                     self._frames_to_predict.clear()
                     start_time = time.time()
 
-            wave_utils.write_wave("Candidate_Audio.wav", self._frames)
+            wave_utils.write_wave(str(uuid.uuid4()) + ".wav", self._frames)
             self._frames.clear()
 
         except Exception as ex:
@@ -155,3 +155,6 @@ class VoiceEmotionDetectionThread(QThread):
 
     def resume_prediction(self):
         self._is_paused = False
+
+    def abort(self):
+        self.stop_prediction()

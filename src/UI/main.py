@@ -39,9 +39,10 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
         self.__threads = []
         self.face_detection_thread = FaceDetectionThread(self)
-        self.text_to_speech_thread = GoogleSpeechToText(self)
+        self.speech_to_text_thread = GoogleSpeechToText(self)
         self.ui = Ui_MainWindow()
-        self.timer = QTimer()
+        self._video_timer = QTimer()
+        self._speech_to_text_timer = QTimer()
         self.ui.setupUi(self)
         self._state_manager = StateManager(self)
         self._manager = Manager()
@@ -114,24 +115,26 @@ class MainWindow(QMainWindow):
 
     def button_exit_click(self, button, button_name):
         self._state_manager.button_exit_clicked(button, button_name)
+        self.abort_workers()
 
     def button_start_recognition_click(self, button, button_name):
         self._state_manager.button_start_recognition_clicked(button, button_name)
 
     def start_recognition(self):
         # Video
-        self.timer.timeout.connect(self.display_video_stream)
-        self.timer.start(30)
+        self._video_timer.timeout.connect(self.display_video_stream)
+        self._video_timer.start(30)
 
         # Audio
-        self.ui.audioPlotterWidget.start_prediction()
+        self.ui.audioPlotterWidget.start_plotting()
 
         # SpeechToText
-        self.timer.timeout.connect(self.display_text_from_speech)
-        self.timer.start(30)
+        self._speech_to_text_timer.timeout.connect(self.display_text_from_speech)
+        self._speech_to_text_timer.start(2000)
 
         self.start_thread(self.face_detection_thread, "face_detection_thread")
-        self.start_thread(self.text_to_speech_thread, "text_to_speech_thread")
+        self.start_thread(self.speech_to_text_thread, "speech_to_text_thread")
+        self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread, "audio_detection_thread")
 
     def resume_recognition(self):
         self.face_detection_thread.resume_running()
@@ -142,8 +145,12 @@ class MainWindow(QMainWindow):
 
     def stop_recognition(self):
         # Video
-        self.timer.stop()
+        self._video_timer.stop()
+        self._speech_to_text_timer.stop()
         self.face_detection_thread.stop_running()
+
+        # Speech to text
+        self.speech_to_text_thread.stop()
 
         # Audio
         self.ui.audioPlotterWidget.stop_prediction()
@@ -151,11 +158,10 @@ class MainWindow(QMainWindow):
     def button_pause_recognition_click(self, button, button_name):
         self._state_manager.button_pause_recognition_clicked(button, button_name)
 
-        self.pause_recognition()
-
     def pause_recognition(self):
         self.face_detection_thread.pause_running()
         self.ui.audioPlotterWidget.pause_prediction()
+        self.speech_to_text_thread.pause()
 
     def button_click(self):
         button = self.sender()
@@ -171,7 +177,7 @@ class MainWindow(QMainWindow):
                 MainWindow.logger.log_error(exception.value)
 
     def display_text_from_speech(self):
-        new_text = self.text_to_speech_thread.get_new_text()
+        new_text = self.speech_to_text_thread.get_new_text()
         if new_text is not None:
             print(new_text)
             self.ui.emotioTextEdit.appendPlainText(new_text + ". ")
@@ -206,7 +212,12 @@ class MainWindow(QMainWindow):
 
         # even though threads have exited, there may still be messages on the main thread's
         # queue (messages that threads emitted before the abort):
+        self.__threads.clear()
         self.logger.log_debug('All threads exited')
+
+    def closeEvent(self, event):
+        self._state_manager.button_exit_clicked(None, "Exit")
+        self.abort_workers()
 
     def reset_style(self, button_name):
         UIFunctions.resetStyle(self, button_name)

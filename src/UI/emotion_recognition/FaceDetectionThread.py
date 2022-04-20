@@ -1,15 +1,17 @@
 import cv2
 import dlib
 import numpy as np
+import time
 from PySide6.QtCore import QObject
-
+from imutils import face_utils
 from scipy.ndimage import zoom
 from scipy.spatial import distance
-from imutils import face_utils
+
 from PIL import Image
 
-from PySide6.QtWidgets import QMessageBox
+# from PySide6.QtWidgets import QMessageBox
 
+from reports import DataStoreManager
 from utils.Logger import Logger
 from utils.Manager import Manager
 
@@ -26,6 +28,18 @@ def is_face_detected(face):
     return face.shape[0] != 0 and face.shape[1] != 0
 
 
+def get_representative_frame(frame_to_predictions, selected_class):
+    frame_to_return = None
+    max_accuracy = 0
+    for frame, predictions in frame_to_predictions:
+        accuracy = predictions[selected_class]
+        if accuracy > max_accuracy:
+            max_accuracy = accuracy
+            frame_to_return = frame
+
+    return frame_to_return
+
+
 class FaceDetectionThread(QObject):
     def __init__(self, parent=None):
         super().__init__()
@@ -40,9 +54,9 @@ class FaceDetectionThread(QObject):
 
         self._ear_thresh = 0.17
         self._no_classes = 7
+        self._classes = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
 
         self._nose_bridge = [28, 29, 30, 31, 33, 34, 35]
-        self._manager = Manager()
         self._face_detect = dlib.get_frontal_face_detector()
 
         self._videoTextFont = cv2.QT_FONT_NORMAL
@@ -61,6 +75,12 @@ class FaceDetectionThread(QObject):
         self.FACIAL_LANDMARKS_JAW = face_utils.FACIAL_LANDMARKS_IDXS["jaw"]
 
         self._frames = []
+
+        self._manager = Manager()
+        self._data_store_manager = DataStoreManager()
+
+    def get_label(self, argument):
+        return self._classes.get(argument, "Invalid emotion")
 
     def stop_running(self):
         self._is_running = self._is_paused = False
@@ -243,7 +263,11 @@ class FaceDetectionThread(QObject):
 
         self._is_running = True
         self._is_paused = False
+        self._abort = False
 
+        predictions_map = {}
+        frame_to_predictions = []
+        start_time = time.time()
         try:
             while self._is_running:
                 _, frame = self._manager.active_camera.read()
@@ -274,6 +298,22 @@ class FaceDetectionThread(QObject):
 
                     # Make Prediction
                     prediction = self._manager.video_model.predict(face)
+
+                    frame_to_predictions.append((frame, prediction[0]))
+                    prediction_emotion = self.get_label(np.argmax(prediction[0]))
+                    predictions_map[prediction_emotion] = predictions_map[prediction_emotion] + 1 \
+                        if prediction_emotion in predictions_map else 1
+
+                    current_time = time.time()
+                    if current_time - start_time > 4:
+                        mean_prediction = max(predictions_map, key=predictions_map.get)
+                        highest_class_index = [k for k, v in self._classes.items() if v == mean_prediction][0]
+                        representative_frame = get_representative_frame(frame_to_predictions, highest_class_index)
+                        self._data_store_manager.insert_video((current_time, (representative_frame, mean_prediction)))
+
+                        predictions_map.clear()
+                        frame_to_predictions.clear()
+                        start_time = time.time()
 
                     self.drawPredictions(frame, prediction)
                     self.drawRectangle(frame, x, y, width, height)
