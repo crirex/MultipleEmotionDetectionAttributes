@@ -275,6 +275,17 @@ class FaceDetectionThread(QObject):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 rects = self._face_detect(gray, 0)
 
+                current_time = time.time()
+                if current_time - start_time > 4 and len(predictions_map) > 0:
+                    mean_prediction = max(predictions_map, key=predictions_map.get)
+                    highest_class_index = [k for k, v in self._classes.items() if v == mean_prediction][0]
+                    representative_frame = get_representative_frame(frame_to_predictions, highest_class_index)
+                    self._data_store_manager.insert_video((current_time, (representative_frame, mean_prediction)))
+
+                    predictions_map.clear()
+                    frame_to_predictions.clear()
+                    start_time = time.time()
+
                 if len(rects) and not self._is_paused:
                     shape_img = self._manager.video_predictor_landmarks(gray, rects[0])
                     shape = face_utils.shape_to_np(shape_img)
@@ -297,23 +308,15 @@ class FaceDetectionThread(QObject):
                     face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
                     # Make Prediction
+                    test = time.time()
                     prediction = self._manager.video_model.predict(face)
+
+                    # print("Video prediction time: " + str(time.time() - test))
 
                     frame_to_predictions.append((frame, prediction[0]))
                     prediction_emotion = self.get_label(np.argmax(prediction[0]))
                     predictions_map[prediction_emotion] = predictions_map[prediction_emotion] + 1 \
                         if prediction_emotion in predictions_map else 1
-
-                    current_time = time.time()
-                    if current_time - start_time > 4:
-                        mean_prediction = max(predictions_map, key=predictions_map.get)
-                        highest_class_index = [k for k, v in self._classes.items() if v == mean_prediction][0]
-                        representative_frame = get_representative_frame(frame_to_predictions, highest_class_index)
-                        self._data_store_manager.insert_video((current_time, (representative_frame, mean_prediction)))
-
-                        predictions_map.clear()
-                        frame_to_predictions.clear()
-                        start_time = time.time()
 
                     self.drawPredictions(frame, prediction)
                     self.drawRectangle(frame, x, y, width, height)
@@ -336,6 +339,8 @@ class FaceDetectionThread(QObject):
             self._is_running = False
             self._manager.active_camera.release()
             raise Exception(ex)
+        finally:
+            self._frames.clear()
 
     def abort(self):
         self._abort = True

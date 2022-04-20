@@ -103,4 +103,8 @@ class StateManager(metaclass=Singleton):
 
     def after_report_generated(self):
         print("Report generated ! going back to initial Recognition state")
-        # print(self._data_store_manager.video_predictions)
+        print("Video: " + str(self._data_store_manager.video_predictions.keys()))
+        print(len(self._data_store_manager.video_predictions))
+        print("Audio: " + str(self._data_store_manager.audio_predictions.keys()))
+        print(len(self._data_store_manager.audio_predictions))
+        self._data_store_manager.clear()

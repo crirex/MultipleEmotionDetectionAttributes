@@ -139,6 +139,7 @@ class MainWindow(QMainWindow):
     def resume_recognition(self):
         self.face_detection_thread.resume_running()
         self.ui.audioPlotterWidget.resume_prediction()
+        self.speech_to_text_thread.resume()
 
     def button_stop_recognition_click(self, button, button_name):
         self._state_manager.button_stop_recognition_clicked(button, button_name)

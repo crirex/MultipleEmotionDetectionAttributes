@@ -8,6 +8,7 @@ from scipy.stats import zscore
 import uuid
 import os
 
+from reports import DataStoreManager
 from utils import Manager, Logger
 from utils.Wave import WaveUtils
 
@@ -25,16 +26,17 @@ class VoiceEmotionDetectionThread(QObject):
 
         self._pyAudioObject = pyaudio.PyAudio()
         self._audio_input_stream = None
+        self._is_paused = False
 
         self._frames_to_predict = []
-        self._predicted_frames = []
         self._frames = []
-        self._manager = Manager()
+
         self._emotion = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Neutral', 5: 'Sad', 6: 'Surprise'}
         self._chunk_step = 16000
         self._chunk_size = 49100
 
-        self._is_paused = False
+        self._manager = Manager()
+        self._data_store_manager = DataStoreManager()
 
     def frame(self, y, win_step=64, win_size=128):
         # Number of frames
@@ -62,6 +64,16 @@ class VoiceEmotionDetectionThread(QObject):
 
         return np.asarray(mel_spect)
 
+    def intermediate_predict(self, wave_utils):
+        path = "./temp/"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        file_name = path + str(uuid.uuid4()) + '.wav'
+        wave_utils.write_wave(file_name, self._frames_to_predict)
+        data, _ = wave_utils.load_wave(file_name)
+        os.remove(file_name)
+        return data
+
     def work(self):
         self._is_paused = False
         self._audio_input_stream = self._pyAudioObject.open(
@@ -83,28 +95,29 @@ class VoiceEmotionDetectionThread(QObject):
                     continue
 
                 self._frames_to_predict.append(data)
-                end_time = time.time()
-                seconds_passed = end_time - start_time
+                current_time = time.time()
+                seconds_passed = current_time - start_time
                 if seconds_passed > 4:
-                    # data = wave_utils.convert_to_wave(self._frames)
                     if not self._is_paused:
+                        # data = wave_utils.convert_to_wave(self._frames)
                         # Alternative method until I fix the stuff with reading from byte class
-                        file_name = "./Temp/" + str(uuid.uuid4()) + '.wav'
-                        wave_utils.write_wave(file_name, self._frames_to_predict)
-                        data, _ = wave_utils.load_wave(file_name)
-                        os.remove(file_name)
-
+                        test = time.time()
+                        data = self.intermediate_predict(wave_utils)
                         prediction = self.predict_audio(data)[0]
+                        # print("Audio prediction time: " + str(time.time() - test)) 0.3 s
                         str_prediction = f"Current voice emotion detect as: {prediction}"
                         self._parent.chart.setTitle(str_prediction)
                         print(str_prediction)
 
-                        self._predicted_frames.append((self._frames_to_predict, prediction))
+                        self._data_store_manager.insert_audio((current_time, (self._frames_to_predict, prediction)))
 
                     self._frames_to_predict.clear()
                     start_time = time.time()
 
-            wave_utils.write_wave(str(uuid.uuid4()) + ".wav", self._frames)
+            path = "./candidate_speech/"
+            if not os.path.exists(path):
+                os.makedirs(path)
+            wave_utils.write_wave(path + str(uuid.uuid4()) + ".wav", self._frames)
             self._frames.clear()
 
         except Exception as ex:
@@ -147,7 +160,7 @@ class VoiceEmotionDetectionThread(QObject):
 
     def stop_prediction(self):
         self._audio_input_stream.stop_stream()
-        self._audio_input_stream.close()
+        # self._audio_input_stream.close()
 
     def pause_prediction(self):
         self._is_paused = True

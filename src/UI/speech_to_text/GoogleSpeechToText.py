@@ -24,15 +24,16 @@ class GoogleSpeechToText(QObject):
     def work(self):
         if self._recognizer is None:  # This "If" is not tested
             QMessageBox.warning(None, "Text", "Text recognizer not available")
-            self._calling_window.ui.labelVideo.setText("Text recognizer error")
+            self._calling_window.ui.emotioTextEdit.appendPlainText("Text recognizer error")
             return
 
         self._is_running = True
+        self._is_paused = False
         with sr.Microphone() as source:
             while self._is_running:
                 if self._is_paused:
-                    print("Text to speech is paused")
                     continue
+                self._recognizer.adjust_for_ambient_noise(source=source)
                 audio_text = self._recognizer.listen(source)
                 try:
                     text = self._recognizer.recognize_google(audio_text)
@@ -41,12 +42,14 @@ class GoogleSpeechToText(QObject):
                     self._logger.log_error(ex)
                     self._is_running = False
                     raise Exception(ex)
-                except Exception:
-                    # Do nothing
-                    pass
+                except Exception as ex:
+                    raise Exception(ex)
 
     def pause(self):
         self._is_paused = True
+
+    def resume(self):
+        self._is_paused = False
 
     def abort(self):
         self._is_running = False
