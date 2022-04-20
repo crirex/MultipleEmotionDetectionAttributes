@@ -1,19 +1,22 @@
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QObject
 
 import time
 import librosa
 import pyaudio
 import numpy as np
 from scipy.stats import zscore
+import uuid
+import os
 
-from utils import Manager
+from utils import Manager, Logger
 from utils.Wave import WaveUtils
 
 
-class VoiceEmotionDetectionThread(QThread):
+class VoiceEmotionDetectionThread(QObject):
     def __init__(self, parent=None):
-        QThread.__init__(self, parent)
+        super().__init__()
         self._parent = parent
+        self._logger = Logger()
 
         self._channels = 1
         self._frame_rate = 16000
@@ -23,11 +26,15 @@ class VoiceEmotionDetectionThread(QThread):
         self._pyAudioObject = pyaudio.PyAudio()
         self._audio_input_stream = None
 
+        self._frames_to_predict = []
+        self._predicted_frames = []
         self._frames = []
         self._manager = Manager()
         self._emotion = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Neutral', 5: 'Sad', 6: 'Surprise'}
         self._chunk_step = 16000
         self._chunk_size = 49100
+
+        self._is_paused = False
 
     def frame(self, y, win_step=64, win_size=128):
         # Number of frames
@@ -55,7 +62,8 @@ class VoiceEmotionDetectionThread(QThread):
 
         return np.asarray(mel_spect)
 
-    def run(self):
+    def work(self):
+        self._is_paused = False
         self._audio_input_stream = self._pyAudioObject.open(
             format=pyaudio.paInt16,
             channels=self._channels,
@@ -66,26 +74,42 @@ class VoiceEmotionDetectionThread(QThread):
 
         wave_utils = WaveUtils()
         start_time = time.time()
-        while self._audio_input_stream.is_active():
-            data = self._audio_input_stream.read(self._frames_per_buffer)
-            self._frames.append(data)
-            end_time = time.time()
-            seconds_passed = end_time - start_time
-            if seconds_passed > 4:
-                start_time = time.time()
-                # data = wave_utils.convert_to_wave(self._frames)
+        try:
+            while self._audio_input_stream.is_active():
+                data = self._audio_input_stream.read(self._frames_per_buffer)
+                self._frames.append(data)
 
-                # Alternative method until I fix the stuff with reading from byte class
-                import uuid
-                import os
-                file_name = "./Temp/" + str(uuid.uuid4()) + '.wav'
-                wave_utils.write_wave(file_name, self._frames)
-                data, _ = wave_utils.load_wave(file_name)
-                os.remove(file_name)
-                prediction = self.predict_audio(data)
-                self._parent.chart.setTitle(f"Current voice emotion detect as: {prediction[0]}")
-                print(prediction)
-                self._frames.clear()
+                if self._is_paused:
+                    continue
+
+                self._frames_to_predict.append(data)
+                end_time = time.time()
+                seconds_passed = end_time - start_time
+                if seconds_passed > 4:
+                    # data = wave_utils.convert_to_wave(self._frames)
+                    if not self._is_paused:
+                        # Alternative method until I fix the stuff with reading from byte class
+                        file_name = "./Temp/" + str(uuid.uuid4()) + '.wav'
+                        wave_utils.write_wave(file_name, self._frames_to_predict)
+                        data, _ = wave_utils.load_wave(file_name)
+                        os.remove(file_name)
+
+                        prediction = self.predict_audio(data)[0]
+                        str_prediction = f"Current voice emotion detect as: {prediction}"
+                        self._parent.chart.setTitle(str_prediction)
+                        print(str_prediction)
+
+                        self._predicted_frames.append((self._frames_to_predict, prediction))
+
+                    self._frames_to_predict.clear()
+                    start_time = time.time()
+
+            wave_utils.write_wave(str(uuid.uuid4()) + ".wav", self._frames)
+            self._frames.clear()
+
+        except Exception as ex:
+            self._logger.log_error(ex)
+            raise Exception(ex)
 
     def process_audio_file(self, filename):
         # load audio file
@@ -94,6 +118,7 @@ class VoiceEmotionDetectionThread(QThread):
 
     def predict_audio(self, y):
         if y is None or len(y) < self._chunk_size:
+            self._logger.log_warning(f"Data to predict is None or the length is smaller than {self._chunk_size}")
             return None
 
         # preprocess
@@ -120,6 +145,16 @@ class VoiceEmotionDetectionThread(QThread):
         predict = [self._emotion.get(emotion) for emotion in predict]
         return predict
 
-    def stop_recording(self):
+    def stop_prediction(self):
         self._audio_input_stream.stop_stream()
         self._audio_input_stream.close()
+
+    def pause_prediction(self):
+        self._is_paused = True
+        self._parent.chart.setTitle("Prediction is paused ")
+
+    def resume_prediction(self):
+        self._is_paused = False
+
+    def abort(self):
+        self.stop_prediction()

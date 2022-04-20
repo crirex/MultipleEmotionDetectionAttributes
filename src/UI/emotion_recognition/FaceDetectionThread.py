@@ -1,15 +1,17 @@
 import cv2
 import dlib
 import numpy as np
+import time
 from PySide6.QtCore import QObject
-
+from imutils import face_utils
 from scipy.ndimage import zoom
 from scipy.spatial import distance
-from imutils import face_utils
+
 from PIL import Image
 
-from PySide6.QtWidgets import QMessageBox
+# from PySide6.QtWidgets import QMessageBox
 
+from reports import DataStoreManager
 from utils.Logger import Logger
 from utils.Manager import Manager
 
@@ -26,11 +28,24 @@ def is_face_detected(face):
     return face.shape[0] != 0 and face.shape[1] != 0
 
 
+def get_representative_frame(frame_to_predictions, selected_class):
+    frame_to_return = None
+    max_accuracy = 0
+    for frame, predictions in frame_to_predictions:
+        accuracy = predictions[selected_class]
+        if accuracy > max_accuracy:
+            max_accuracy = accuracy
+            frame_to_return = frame
+
+    return frame_to_return
+
+
 class FaceDetectionThread(QObject):
     def __init__(self, parent=None):
         super().__init__()
         self._calling_window = parent
-        self._is_running = True
+        self._is_running = False
+        self._is_paused = False
         self._abort = False
         self._logger = Logger()
 
@@ -39,9 +54,9 @@ class FaceDetectionThread(QObject):
 
         self._ear_thresh = 0.17
         self._no_classes = 7
+        self._classes = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
 
         self._nose_bridge = [28, 29, 30, 31, 33, 34, 35]
-        self._manager = Manager()
         self._face_detect = dlib.get_frontal_face_detector()
 
         self._videoTextFont = cv2.QT_FONT_NORMAL
@@ -61,34 +76,25 @@ class FaceDetectionThread(QObject):
 
         self._frames = []
 
+        self._manager = Manager()
+        self._data_store_manager = DataStoreManager()
+
+    def get_label(self, argument):
+        return self._classes.get(argument, "Invalid emotion")
+
     def stop_running(self):
-        self._is_running = False
+        self._is_running = self._is_paused = False
+
+    def pause_running(self):
+        self._is_paused = True
+
+    def resume_running(self):
+        self._is_paused = False
 
     def get_frame(self):
         if len(self._frames) > 0:
             return self._frames.pop(0)
         return None
-
-    def detect_face(self, frame):
-
-        # Cascade classifier pre-trained model
-        faceCascade = cv2.CascadeClassifier('Models/face_landmarks.dat')
-
-        # BGR -> Gray conversion
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Cascade MultiScale classifier
-        detected_faces = faceCascade.detectMultiScale(image=gray, scaleFactor=1.1, minNeighbors=6,
-                                                      minSize=(self._shape_x, self._shape_y),
-                                                      flags=cv2.CASCADE_SCALE_IMAGE)
-        coord = []
-
-        for x, y, w, h in detected_faces:
-            if w > 100:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 1)
-                coord.append([x, y, w, h])
-
-        return gray, detected_faces, coord
 
     def has_glasses(self, shape, frame):
         landmarks = np.array([[p.x, p.y] for p in shape.parts()])
@@ -250,13 +256,18 @@ class FaceDetectionThread(QObject):
         cv2.drawContours(image=frame, contours=[ebrHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
     def work(self):
-        if self._manager.active_camera is None or not self._manager.active_camera.isOpened():
-            QMessageBox.warning(None, "Video", "There is no video input device available.")
+        if not self._manager.is_camera_available():
+            # QMessageBox.warning(self._calling_window, "Video", "There is no video input device available.")
             self._calling_window.ui.labelVideo.setText("No camera detected")
             return
 
         self._is_running = True
+        self._is_paused = False
+        self._abort = False
 
+        predictions_map = {}
+        frame_to_predictions = []
+        start_time = time.time()
         try:
             while self._is_running:
                 _, frame = self._manager.active_camera.read()
@@ -264,7 +275,7 @@ class FaceDetectionThread(QObject):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 rects = self._face_detect(gray, 0)
 
-                if len(rects):
+                if len(rects) and not self._is_paused:
                     shape_img = self._manager.video_predictor_landmarks(gray, rects[0])
                     shape = face_utils.shape_to_np(shape_img)
 
@@ -287,6 +298,22 @@ class FaceDetectionThread(QObject):
 
                     # Make Prediction
                     prediction = self._manager.video_model.predict(face)
+
+                    frame_to_predictions.append((frame, prediction[0]))
+                    prediction_emotion = self.get_label(np.argmax(prediction[0]))
+                    predictions_map[prediction_emotion] = predictions_map[prediction_emotion] + 1 \
+                        if prediction_emotion in predictions_map else 1
+
+                    current_time = time.time()
+                    if current_time - start_time > 4:
+                        mean_prediction = max(predictions_map, key=predictions_map.get)
+                        highest_class_index = [k for k, v in self._classes.items() if v == mean_prediction][0]
+                        representative_frame = get_representative_frame(frame_to_predictions, highest_class_index)
+                        self._data_store_manager.insert_video((current_time, (representative_frame, mean_prediction)))
+
+                        predictions_map.clear()
+                        frame_to_predictions.clear()
+                        start_time = time.time()
 
                     self.drawPredictions(frame, prediction)
                     self.drawRectangle(frame, x, y, width, height)

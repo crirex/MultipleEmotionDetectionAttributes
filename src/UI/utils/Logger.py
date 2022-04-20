@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from utils.Singleton import Singleton
 
 
@@ -7,8 +8,11 @@ class Logger(metaclass=Singleton):
         self._logger = logging.getLogger()
         self._logger.setLevel(level=logging.DEBUG)
 
+        current_time = datetime.now()
+        date_time = current_time.strftime("%m.%d.%Y_%H.%M.%S")
+
         console_handler = logging.StreamHandler()
-        file_handler = logging.FileHandler('emotion_recognition.log')
+        file_handler = logging.FileHandler(f'logs/emotion_recognition_{date_time}.log')
 
         console_handler.setLevel(logging.INFO)
         file_handler.setLevel(logging.INFO)
