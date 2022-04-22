@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, QThread
 
 import time
 import librosa
@@ -8,6 +8,7 @@ from scipy.stats import zscore
 import uuid
 import os
 
+from emotion_recognition.VoiceEmotionPredictionThread import VoiceEmotionPredictionThread
 from reports import DataStoreManager
 from utils import Manager, Logger
 from utils.Wave import WaveUtils
@@ -35,6 +36,8 @@ class VoiceEmotionDetectionThread(QObject):
         self._chunk_step = 16000
         self._chunk_size = 49100
 
+        self.voice_prediction = VoiceEmotionPredictionThread()
+        self._voice_prediction_thread = None
         self._manager = Manager()
         self._data_store_manager = DataStoreManager()
 
@@ -64,12 +67,12 @@ class VoiceEmotionDetectionThread(QObject):
 
         return np.asarray(mel_spect)
 
-    def intermediate_predict(self, wave_utils):
+    def read_intermediate_wave(self, wave_utils):
         path = "./temp/"
         if not os.path.exists(path):
             os.makedirs(path)
         file_name = path + str(uuid.uuid4()) + '.wav'
-        wave_utils.write_wave(file_name, self._frames_to_predict)
+        wave_utils.write_wave(file_name, self._frames_to_predict[:])
         data, _ = wave_utils.load_wave(file_name)
         os.remove(file_name)
         return data
@@ -94,26 +97,27 @@ class VoiceEmotionDetectionThread(QObject):
                 if self._is_paused:
                     continue
 
+                latest_prediction = self.voice_prediction.get_latest_prediction()
+                if latest_prediction is not None:
+                    str_prediction = f"Current voice emotion detect as: {latest_prediction}"
+                    self._parent.chart.setTitle(str_prediction)
+                    print(str_prediction)
+
                 self._frames_to_predict.append(data)
                 current_time = time.time()
                 seconds_passed = current_time - start_time
                 if seconds_passed > 4:
+                    print("4 seconds passed")
                     if not self._is_paused:
                         # data = wave_utils.convert_to_wave(self._frames)
                         # Alternative method until I fix the stuff with reading from byte class
-                        test = time.time()
-                        data = self.intermediate_predict(wave_utils)
-                        prediction = self.predict_audio(data)[0]
-                        # print("Audio prediction time: " + str(time.time() - test)) 0.3 s
-                        str_prediction = f"Current voice emotion detect as: {prediction}"
-                        self._parent.chart.setTitle(str_prediction)
-                        print(str_prediction)
-
-                        self._data_store_manager.insert_audio((current_time, (self._frames_to_predict, prediction)))
+                        data = self.read_intermediate_wave(wave_utils)
+                        self.voice_prediction.queue_data((current_time, data))
 
                     self._frames_to_predict.clear()
                     start_time = time.time()
 
+            self.voice_prediction.abort()
             path = "./candidate_speech/"
             if not os.path.exists(path):
                 os.makedirs(path)

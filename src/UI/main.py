@@ -40,10 +40,14 @@ class MainWindow(QMainWindow):
         self.__threads = []
         self.face_detection_thread = FaceDetectionThread(self)
         self.speech_to_text_thread = GoogleSpeechToText(self)
+
         self.ui = Ui_MainWindow()
+
         self._video_timer = QTimer()
         self._speech_to_text_timer = QTimer()
+
         self.ui.setupUi(self)
+
         self._state_manager = StateManager(self)
         self._manager = Manager()
 
@@ -135,6 +139,7 @@ class MainWindow(QMainWindow):
         self.start_thread(self.face_detection_thread, "face_detection_thread")
         self.start_thread(self.speech_to_text_thread, "speech_to_text_thread")
         self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread, "audio_detection_thread")
+        self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread.voice_prediction, "audio_prediction_thread")
 
     def resume_recognition(self):
         self.face_detection_thread.resume_running()
