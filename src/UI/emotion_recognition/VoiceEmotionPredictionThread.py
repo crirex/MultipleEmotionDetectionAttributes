@@ -81,27 +81,22 @@ class VoiceEmotionPredictionThread(QObject):
 
     def work(self):
         self._is_running = True
-        try:
-            while self._is_running or len(self._data_to_predict_list) > 0:
-                if self._is_running:
-                    print("Sleeping for 2 seconds zzz")
-                    time.sleep(2)
-                if len(self._data_to_predict_list) == 0:
-                    continue
+        while self._is_running or len(self._data_to_predict_list) > 0:
+            if self._is_running:
+                print("Sleeping for 2 seconds zzz")
+                time.sleep(2)
 
-                timestamp, data = self._data_to_predict_list.pop(0)
-                if data is None or len(data) == 0:
-                    continue
+            if len(self._data_to_predict_list) == 0:
+                continue
 
+            timestamp, data = self._data_to_predict_list.pop(0)
+            if data is None or len(data) == 0:
+                continue
+
+            if self._predict_audio(data) is not None:
                 prediction = self._predict_audio(data)[0]
                 self._predictions.append(prediction)
-
                 self._data_store_manager.insert_audio((timestamp, (data, prediction)))
-
-        except Exception as ex:
-            print(ex)
-        finally:
-            print("ciau")
 
     def queue_data(self, data):
         self._data_to_predict_list.append(data)
