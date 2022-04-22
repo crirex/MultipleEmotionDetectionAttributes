@@ -275,12 +275,16 @@ class FaceDetectionThread(QObject):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 rects = self._face_detect(gray, 0)
 
+                if len(predictions_map) == 0:
+                    start_time = time.time()
+
                 current_time = time.time()
                 if current_time - start_time > 4 and len(predictions_map) > 0:
-                    mean_prediction = max(predictions_map, key=predictions_map.get)
-                    highest_class_index = [k for k, v in self._classes.items() if v == mean_prediction][0]
+                    max_prediction = max(predictions_map, key=predictions_map.get)
+                    print(f"Video prediction: {max_prediction}")
+                    highest_class_index = [k for k, v in self._classes.items() if v == max_prediction][0]
                     representative_frame = get_representative_frame(frame_to_predictions, highest_class_index)
-                    self._data_store_manager.insert_video((current_time, (representative_frame, mean_prediction)))
+                    self._data_store_manager.insert_video((current_time, (representative_frame, max_prediction)))
 
                     predictions_map.clear()
                     frame_to_predictions.clear()
@@ -310,8 +314,6 @@ class FaceDetectionThread(QObject):
                     # Make Prediction
                     test = time.time()
                     prediction = self._manager.video_model.predict(face)
-
-                    # print("Video prediction time: " + str(time.time() - test))
 
                     frame_to_predictions.append((frame, prediction[0]))
                     prediction_emotion = self.get_label(np.argmax(prediction[0]))

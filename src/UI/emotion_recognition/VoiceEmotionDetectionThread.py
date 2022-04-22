@@ -91,25 +91,28 @@ class VoiceEmotionDetectionThread(QObject):
                 data = self._audio_input_stream.read(self._frames_per_buffer)
                 self._frames.append(data)
 
-                if self._is_paused:
+                if self._is_paused and len(self._frames_to_predict) == 0:
+                    start_time = time.time()
                     continue
 
                 self._frames_to_predict.append(data)
                 current_time = time.time()
                 seconds_passed = current_time - start_time
                 if seconds_passed > 4:
-                    if not self._is_paused:
-                        # data = wave_utils.convert_to_wave(self._frames)
-                        # Alternative method until I fix the stuff with reading from byte class
-                        test = time.time()
-                        data = self.intermediate_predict(wave_utils)
-                        prediction = self.predict_audio(data)[0]
-                        # print("Audio prediction time: " + str(time.time() - test)) 0.3 s
-                        str_prediction = f"Current voice emotion detect as: {prediction}"
-                        self._parent.chart.setTitle(str_prediction)
-                        print(str_prediction)
+                    print(len(self._frames_to_predict))
+                    # data = wave_utils.convert_to_wave(self._frames)
+                    # Alternative method until I fix the stuff with reading from byte class
+                    data = self.intermediate_predict(wave_utils)
+                    prediction = self.predict_audio(data)[0]
 
-                        self._data_store_manager.insert_audio((current_time, (self._frames_to_predict, prediction)))
+                    # Case where the user paused and we need still need data to record,
+                    # we ain't gonna show to the user
+                    str_prediction = f"Current voice emotion detect as: {prediction}"
+                    if not self._is_paused:
+                        self._parent.chart.setTitle(str_prediction)
+                    print(str_prediction)
+
+                    self._data_store_manager.insert_audio((current_time, (self._frames_to_predict, prediction)))
 
                     self._frames_to_predict.clear()
                     start_time = time.time()
