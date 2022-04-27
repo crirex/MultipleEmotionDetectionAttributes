@@ -40,10 +40,14 @@ class MainWindow(QMainWindow):
         self.__threads = []
         self.face_detection_thread = FaceDetectionThread(self)
         self.speech_to_text_thread = GoogleSpeechToText(self)
+
         self.ui = Ui_MainWindow()
+
         self._video_timer = QTimer()
         self._speech_to_text_timer = QTimer()
+
         self.ui.setupUi(self)
+
         self._state_manager = StateManager(self)
         self._manager = Manager()
 
@@ -133,12 +137,17 @@ class MainWindow(QMainWindow):
         self._speech_to_text_timer.start(2000)
 
         self.start_thread(self.face_detection_thread, "face_detection_thread")
+        self.start_thread(self.face_detection_thread.video_prediction, "face_emotion_detection_thread")
+
         self.start_thread(self.speech_to_text_thread, "speech_to_text_thread")
+
         self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread, "audio_detection_thread")
+        self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread.voice_prediction, "audio_prediction_thread")
 
     def resume_recognition(self):
         self.face_detection_thread.resume_running()
         self.ui.audioPlotterWidget.resume_prediction()
+        self.speech_to_text_thread.resume()
 
     def button_stop_recognition_click(self, button, button_name):
         self._state_manager.button_stop_recognition_clicked(button, button_name)
