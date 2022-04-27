@@ -10,7 +10,7 @@ from scipy.spatial import distance
 from PIL import Image
 
 # from PySide6.QtWidgets import QMessageBox
-
+from emotion_recognition.FaceEmotionDetectionThread import FaceEmotionDetectionThread
 from reports import DataStoreManager
 from utils.Logger import Logger
 from utils.Manager import Manager
@@ -79,6 +79,8 @@ class FaceDetectionThread(QObject):
         self._manager = Manager()
         self._data_store_manager = DataStoreManager()
 
+        self.video_prediction = FaceEmotionDetectionThread()
+
     def get_label(self, argument):
         return self._classes.get(argument, "Invalid emotion")
 
@@ -128,17 +130,17 @@ class FaceDetectionThread(QObject):
 
         return False
 
-    def drawFaceDots(self, frame, shape):
+    def draw_face_dots(self, frame, shape):
         for (j, k) in shape:
             cv2.circle(img=frame, center=(j, k), radius=1, color=self._facialDotsColor, thickness=-1)
 
-    def drawRectangle(self, frame, x, y, width, height):
+    def draw_rectangle(self, frame, x, y, width, height):
         cv2.rectangle(frame, (x, y), (x + width, y + height), (0, 255, 0), 2)
         cv2.putText(img=frame, text="Face", org=(x - 10, y - 10),
                     fontFace=self._videoTextFont, fontScale=self._videoTextFontScale, color=(0, 255, 0),
                     thickness=self._videoTextThickness)
 
-    def drawMainPrediction(self, frame, prediction, x, y, width):
+    def draw_main_prediction(self, frame, prediction, x, y, width):
         prediction_result = np.argmax(prediction)
         predictedLabelPosition = (x + width - 10, y - 10)
         if prediction_result == 0:
@@ -163,7 +165,7 @@ class FaceDetectionThread(QObject):
             cv2.putText(img=frame, text="Neutral", org=predictedLabelPosition,
                         fontFace=self._videoTextFont, fontScale=1, color=self._facialRectangleColor, thickness=2)
 
-    def drawPredictions(self, frame, prediction):
+    def draw_predictions(self, frame, prediction):
         cv2.putText(img=frame, text="Emotional report:",
                     org=(40, 120), fontFace=self._videoTextFont,
                     fontScale=self._videoTextFontScale, color=self._videoTextColor,
@@ -197,7 +199,7 @@ class FaceDetectionThread(QObject):
                     fontScale=self._videoTextFontScale, color=self._videoTextColor,
                     thickness=self._videoTextThickness)
 
-    def drawIfOpenEyes(self, frame, shape):
+    def draw_if_open_eyes(self, frame, shape):
         (lStart, lEnd) = self.FACIAL_LANDMARKS_LEFT_EYE
         (rStart, rEnd) = self.FACIAL_LANDMARKS_RIGHT_EYE
         leftEye = shape[lStart:lEnd]
@@ -209,13 +211,13 @@ class FaceDetectionThread(QObject):
                     org=(40, 400), fontFace=self._videoTextFont, fontScale=self._videoTextFontScale,
                     color=self._videoTextColor, thickness=self._videoTextThickness)
 
-    def drawIfGlasses(self, frame, shape_img, gray):
+    def draw_if_glasses(self, frame, shape_img, gray):
         has_glasses = str(self.has_glasses(shape_img, gray))
         cv2.putText(img=frame, text="Glasses: {}".format(has_glasses),
                     org=(40, 380), fontFace=self._videoTextFont, fontScale=self._videoTextFontScale,
                     color=self._videoTextColor, thickness=self._videoTextThickness)
 
-    def drawEyes(self, frame, shape):
+    def draw_eyes(self, frame, shape):
         (lStart, lEnd) = self.FACIAL_LANDMARKS_LEFT_EYE
         (rStart, rEnd) = self.FACIAL_LANDMARKS_RIGHT_EYE
         leftEye = shape[lStart:lEnd]
@@ -227,25 +229,25 @@ class FaceDetectionThread(QObject):
         cv2.drawContours(image=frame, contours=[rightEyeHull], contourIdx=-1,
                          color=(0, 255, 0), thickness=1)
 
-    def drawNose(self, frame, shape):
+    def draw_nose(self, frame, shape):
         (nStart, nEnd) = self.FACIAL_LANDMARKS_NOSE
         nose = shape[nStart:nEnd]
         noseHull = cv2.convexHull(nose)
         cv2.drawContours(image=frame, contours=[noseHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
-    def drawMouth(self, frame, shape):
+    def draw_mouth(self, frame, shape):
         (mStart, mEnd) = self.FACIAL_LANDMARKS_MOUTH
         mouth = shape[mStart:mEnd]
         mouthHull = cv2.convexHull(mouth)
         cv2.drawContours(image=frame, contours=[mouthHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
-    def drawJaw(self, frame, shape):
+    def draw_jaw(self, frame, shape):
         (jStart, jEnd) = self.FACIAL_LANDMARKS_JAW
         jaw = shape[jStart:jEnd]
         jawHull = cv2.convexHull(jaw)
         cv2.drawContours(image=frame, contours=[jawHull], contourIdx=-1, color=(0, 255, 0), thickness=1)
 
-    def drawEyebrows(self, frame, shape):
+    def draw_eyebrows(self, frame, shape):
         (eblStart, eblEnd) = self.FACIAL_LANDMARKS_LEFT_EYEBROW
         (ebrStart, ebrEnd) = self.FACIAL_LANDMARKS_RIGHT_EYEBROW
         ebl = shape[eblStart:eblEnd]
@@ -312,26 +314,27 @@ class FaceDetectionThread(QObject):
                     face /= float(face.max())
                     face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
-                    # Make Prediction
-                    test = time.time()
+                    self.video_prediction.queue_data(face)
                     prediction = self._manager.video_model.predict(face)
+                    if prediction is None:
+                        continue
 
                     frame_to_predictions.append((frame, prediction[0]))
                     prediction_emotion = self.get_label(np.argmax(prediction[0]))
                     predictions_map[prediction_emotion] = predictions_map[prediction_emotion] + 1 \
                         if prediction_emotion in predictions_map else 1
 
-                    self.drawPredictions(frame, prediction)
-                    self.drawRectangle(frame, x, y, width, height)
-                    self.drawMainPrediction(frame, prediction, x, y, width)
-                    self.drawIfOpenEyes(frame, shape)
-                    self.drawIfGlasses(frame, shape_img, gray)
-                    self.drawEyes(frame, shape)
-                    self.drawNose(frame, shape)
-                    self.drawMouth(frame, shape)
-                    self.drawJaw(frame, shape)
-                    self.drawEyebrows(frame, shape)
-                    self.drawFaceDots(frame, shape)
+                    self.draw_predictions(frame, prediction)
+                    self.draw_rectangle(frame, x, y, width, height)
+                    self.draw_main_prediction(frame, prediction, x, y, width)
+                    self.draw_if_open_eyes(frame, shape)
+                    self.draw_if_glasses(frame, shape_img, gray)
+                    self.draw_eyes(frame, shape)
+                    self.draw_nose(frame, shape)
+                    self.draw_mouth(frame, shape)
+                    self.draw_jaw(frame, shape)
+                    self.draw_eyebrows(frame, shape)
+                    self.draw_face_dots(frame, shape)
 
                 self._frames.append(frame)
 
@@ -344,6 +347,7 @@ class FaceDetectionThread(QObject):
             raise Exception(ex)
         finally:
             self._frames.clear()
+            self.video_prediction.abort()
 
     def abort(self):
         self._abort = True

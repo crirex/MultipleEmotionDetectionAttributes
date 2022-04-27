@@ -137,7 +137,10 @@ class MainWindow(QMainWindow):
         self._speech_to_text_timer.start(2000)
 
         self.start_thread(self.face_detection_thread, "face_detection_thread")
+        self.start_thread(self.face_detection_thread.video_prediction, "face_emotion_detection_thread")
+
         self.start_thread(self.speech_to_text_thread, "speech_to_text_thread")
+
         self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread, "audio_detection_thread")
         self.start_thread(self.ui.audioPlotterWidget.audio_recording_thread.voice_prediction, "audio_prediction_thread")
 

@@ -34,7 +34,6 @@ class VoiceEmotionDetectionThread(QObject):
         self._chunk_size = 49100
 
         self.voice_prediction = VoiceEmotionPredictionThread()
-        self._voice_prediction_thread = None
         self._manager = Manager()
         self._data_store_manager = DataStoreManager()
 

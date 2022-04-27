@@ -83,8 +83,8 @@ class VoiceEmotionPredictionThread(QObject):
         self._is_running = True
         while self._is_running or len(self._data_to_predict_list) > 0:
             if self._is_running:
-                print("Sleeping for 2 seconds zzz")
-                time.sleep(2)
+                # print("Sleeping for 1 seconds zzz")
+                time.sleep(1)
 
             if len(self._data_to_predict_list) == 0:
                 continue
