@@ -279,7 +279,8 @@ class FaceDetectionThread(QObject):
                     start_time = time.time()
 
                 current_time = time.time()
-                if current_time - start_time > 4 and len(predictions_map) > 0:
+                seconds_passed = current_time - start_time
+                if seconds_passed > 4 and len(predictions_map) > 0:
                     max_prediction = max(predictions_map, key=predictions_map.get)
                     print(f"Video prediction: {max_prediction}")
                     highest_class_index = [k for k, v in self._classes.items() if v == max_prediction][0]
@@ -290,7 +291,7 @@ class FaceDetectionThread(QObject):
                     frame_to_predictions.clear()
                     start_time = time.time()
 
-                if len(rects) and not self._is_paused:
+                if len(rects) and (not self._is_paused or len(predictions_map) > 0):
                     shape_img = self._manager.video_predictor_landmarks(gray, rects[0])
                     shape = face_utils.shape_to_np(shape_img)
 

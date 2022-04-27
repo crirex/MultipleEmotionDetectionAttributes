@@ -81,12 +81,8 @@ class VoiceEmotionDetectionThread(QObject):
                 current_time = time.time()
                 seconds_passed = current_time - start_time
                 if seconds_passed > 4:
-                    print("4 seconds passed")
-                    if not self._is_paused:
-                        # data = wave_utils.convert_to_wave(self._frames)
-                        # Alternative method until I fix the stuff with reading from byte class
-                        data = self.read_intermediate_wave(wave_utils)
-                        self.voice_prediction.queue_data((current_time, data))
+                    data = self.read_intermediate_wave(wave_utils)
+                    self.voice_prediction.queue_data((current_time, data))
 
                     self._frames_to_predict.clear()
                     start_time = time.time()

@@ -2,6 +2,7 @@ import speech_recognition as sr
 
 from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QMessageBox
+import time
 
 from utils.Logger import Logger
 
@@ -32,6 +33,7 @@ class GoogleSpeechToText(QObject):
         with sr.Microphone() as source:
             while self._is_running:
                 if self._is_paused:
+                    time.sleep(1)
                     continue
                 self._recognizer.adjust_for_ambient_noise(source=source)
                 audio_text = self._recognizer.listen(source)
