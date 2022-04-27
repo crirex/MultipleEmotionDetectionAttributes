@@ -93,8 +93,9 @@ class VoiceEmotionPredictionThread(QObject):
             if data is None or len(data) == 0:
                 continue
 
-            if self._predict_audio(data) is not None:
-                prediction = self._predict_audio(data)[0]
+            predictions = self._predict_audio(data)
+            if predictions is not None:
+                prediction = predictions[0]
                 self._predictions.append(prediction)
                 self._data_store_manager.insert_audio((timestamp, (data, prediction)))
 
