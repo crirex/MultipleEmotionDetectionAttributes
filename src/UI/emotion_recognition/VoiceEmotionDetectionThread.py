@@ -60,6 +60,9 @@ class VoiceEmotionDetectionThread(QObject):
         wave_utils = WaveUtils()
         start_time = time.time()
         time_format = "%Y-%m-%d %H:%M:%S"
+        path = "./candidate_speech/"
+        full_path = path + str(uuid.uuid4()) + ".wav"
+        self._data_store_manager.audio_path = full_path
         try:
             while self._audio_input_stream.is_active():
                 data = self._audio_input_stream.read(self._frames_per_buffer)
@@ -87,10 +90,10 @@ class VoiceEmotionDetectionThread(QObject):
                     start_time = time.time()
 
             self.voice_prediction.abort()
-            path = "./candidate_speech/"
+
             if not os.path.exists(path):
                 os.makedirs(path)
-            wave_utils.write_wave(path + str(uuid.uuid4()) + ".wav", self._frames)
+
             self._frames.clear()
 
         except Exception as ex:

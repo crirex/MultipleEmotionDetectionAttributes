@@ -1,4 +1,5 @@
 from reports import DataStoreManager
+from reports.report_utils import generate_report
 from utils import Singleton, Logger, Manager
 from transitions import Machine
 
@@ -81,6 +82,7 @@ class StateManager(metaclass=Singleton):
         StateManager.logger.log_info("Starting emotion recognition")
 
         if self.state == 'Recognition':
+            self._data_store_manager.start_date = time.time()
             self._main_window.start_recognition()
             return
 
@@ -96,15 +98,19 @@ class StateManager(metaclass=Singleton):
     def stop_recognition(self, button, button_name):
         log_button_click(button, button_name)
         StateManager.logger.log_info("Stop emotion recognition")
+        self._data_store_manager.end_date = time.time()
         self._main_window.stop_recognition()
 
+        print("Video: " + str(self._data_store_manager.video_predictions.keys()))
+        print(len(self._data_store_manager.video_predictions))
+        print("Audio: " + str(self._data_store_manager.audio_predictions.keys()))
+        print(len(self._data_store_manager.audio_predictions))
+
+        # here we should wait for some stuff
+        generate_report()
         # after the report is generated
         self.report_generated()  # emit that the report has been generated
 
     def after_report_generated(self):
         print("Report generated ! going back to initial Recognition state")
-        print("Video: " + str(self._data_store_manager.video_predictions.keys()))
-        print(len(self._data_store_manager.video_predictions))
-        print("Audio: " + str(self._data_store_manager.audio_predictions.keys()))
-        print(len(self._data_store_manager.audio_predictions))
         self._data_store_manager.clear()

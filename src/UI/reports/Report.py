@@ -1,9 +1,11 @@
 import uuid
+# import pickle
 
 
 class Report:
     def __init__(self):
-        self.id = uuid.uuid4()
+        self._id = str(uuid.uuid4())
+        self.predictions_id = None
 
         self.interviewee_name = ''
         self.interviewer_name = ''
@@ -11,15 +13,22 @@ class Report:
         self.interview_start_date = -1  # time.time()
         self.interview_end_date = -1    # time.time()
 
-        self.text = {}  # {Timestamp, Text}
-        self.text_predictions = None  # (First, Second)
+        self.interview_length = -1
 
-        self.audio_path = ''
-        self.audio_predictions = {}  # {Timestamp, ([Frame], Prediction)} ?
+    # def from_dict(self, report_dict):
+    #     for key in report_dict:
+    #         field = report_dict[key]
+    #         if isinstance(field, bytes):
+    #             field = pickle.loads(field)
+    #
+    #         setattr(self, key, field)
 
-        self.video_path = ''
-        self.video_predictions = {}  # {Timestamp, ([Frame]/Frame, Prediction)} ?
+    def initialize(self, data_store_manager):
+        # Alternative until we can get both names from settings
+        self.interviewee_name = "Test_interviewee_name"
+        self.interviewer_name = "Test_interviewer_name"
 
-    @property
-    def interview_length(self):
-        return self.interview_end_date - self.interview_start_date
+        self.interview_start_date = data_store_manager.start_date
+        self.interview_end_date = data_store_manager.end_date
+
+        self.interview_length = self.interview_end_date - self.interview_start_date
