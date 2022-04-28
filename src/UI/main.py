@@ -44,7 +44,6 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
 
         self._video_timer = QTimer()
-        self._speech_to_text_timer = QTimer()
 
         self.ui.setupUi(self)
 
@@ -132,10 +131,6 @@ class MainWindow(QMainWindow):
         # Audio
         self.ui.audioPlotterWidget.start_plotting()
 
-        # SpeechToText
-        self._speech_to_text_timer.timeout.connect(self.display_text_from_speech)
-        self._speech_to_text_timer.start(2000)
-
         self.start_thread(self.face_detection_thread, "face_detection_thread")
         self.start_thread(self.face_detection_thread.video_prediction, "face_emotion_detection_thread")
 
@@ -155,7 +150,6 @@ class MainWindow(QMainWindow):
     def stop_recognition(self):
         # Video
         self._video_timer.stop()
-        self._speech_to_text_timer.stop()
         self.face_detection_thread.stop_running()
 
         # Speech to text
@@ -184,12 +178,6 @@ class MainWindow(QMainWindow):
                 MainWindow.logger.log_warning(machine_error.value)
             except Exception as exception:
                 MainWindow.logger.log_error(exception.value)
-
-    def display_text_from_speech(self):
-        new_text = self.speech_to_text_thread.get_new_text()
-        if new_text is not None:
-            print(new_text)
-            self.ui.emotioTextEdit.appendPlainText(new_text + ". ")
 
     def display_video_stream(self):
         frame = self.face_detection_thread.get_frame()
@@ -237,8 +225,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     MainWindow.logger.log_info("Application starts")
-
-    Manager.app = QApplication(sys.argv)
-    Manager.app.setWindowIcon(QIcon("icon.ico"))
-    window = MainWindow()
-    sys.exit(Manager.app.exec())
+    manager = Manager()
+    manager.app = QApplication(sys.argv)
+    manager.app.setWindowIcon(QIcon("icon.ico"))
+    manager.window = MainWindow()
+    sys.exit(manager.app.exec())

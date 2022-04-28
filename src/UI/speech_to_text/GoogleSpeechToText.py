@@ -4,6 +4,7 @@ from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QMessageBox
 import time
 
+from utils import Manager
 from utils.Logger import Logger
 
 
@@ -16,6 +17,15 @@ class GoogleSpeechToText(QObject):
         self._logger = Logger()
         self._recognizer = sr.Recognizer()
         self._textPredictions = []
+        self._manager = Manager()
+
+        self._recognizer.energy_threshold = 1000  # minimum audio energy to consider for recording
+        self._recognizer.pause_threshold = 0.1  # seconds of non-speaking audio before a phrase is considered complete
+        self._recognizer.phrase_threshold = 0.3  # minimum seconds of speaking audio
+        self._recognizer.non_speaking_duration = 0.1  # seconds of non-speaking audio being recorded
+
+        for index, name in enumerate(sr.Microphone.list_microphone_names()):
+            print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
 
     def get_new_text(self):
         if len(self._textPredictions) > 0:
@@ -31,20 +41,25 @@ class GoogleSpeechToText(QObject):
         self._is_running = True
         self._is_paused = False
         with sr.Microphone() as source:
+            self._recognizer.adjust_for_ambient_noise(source=source)
             while self._is_running:
                 if self._is_paused:
                     time.sleep(1)
                     continue
-                self._recognizer.adjust_for_ambient_noise(source=source)
-                audio_text = self._recognizer.listen(source)
                 try:
+                    audio_text = self._recognizer.listen(source)
                     text = self._recognizer.recognize_google(audio_text)
-                    self._textPredictions.append(text)
+                    self._manager.window.ui.emotioTextEdit.appendPlainText(text + ". ")
                 except OSError as ex:
+                    print(ex.args)
                     self._logger.log_error(ex)
                     self._is_running = False
                     raise Exception(ex)
+                except sr.UnknownValueError:
+                    # An exception that isn't bad at all (Recognizer couldn't detect the text)
+                    pass
                 except Exception as ex:
+                    print(ex.args)
                     raise Exception(ex)
 
     def pause(self):
