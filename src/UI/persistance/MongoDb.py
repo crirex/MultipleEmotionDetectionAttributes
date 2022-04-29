@@ -28,3 +28,27 @@ class MongoDb(metaclass=Singleton):
 
     def save_predictions(self, predictions):
         return self._mongo_fs_collection.put(pickle.dumps(predictions, protocol=2))
+
+    def get_all_reports_of_candidate(self, name):
+        if name not in self._mongo_collections:
+            return None
+
+        return self._mongo_collections.get(name).get_all_reports()
+
+    def get_all_reports(self):
+        collections_name = self._mongo_database.list_collection_names()
+        reports = [self.get_collection(collection_name).get_all_reports() for collection_name in collections_name
+                   if collection_name not in ['fs.chunks', 'fs.files']]
+
+        return [report for reports_group in reports for report in reports_group]
+
+    def get_prediction(self, objectId):
+        if objectId is None:
+            return None
+
+        binary_data = self._mongo_fs_collection.get(objectId).read()
+        if binary_data is None:
+            return None
+
+        predictions = pickle.loads(binary_data)
+        return predictions

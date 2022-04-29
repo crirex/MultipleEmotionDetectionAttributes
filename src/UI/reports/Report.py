@@ -1,5 +1,4 @@
 import uuid
-# import pickle
 
 
 class Report:
@@ -15,13 +14,10 @@ class Report:
 
         self.interview_length = -1
 
-    # def from_dict(self, report_dict):
-    #     for key in report_dict:
-    #         field = report_dict[key]
-    #         if isinstance(field, bytes):
-    #             field = pickle.loads(field)
-    #
-    #         setattr(self, key, field)
+    def from_dict(self, report_dict):
+        for key in report_dict:
+            setattr(self, key, report_dict[key])
+        return self
 
     def initialize(self, data_store_manager):
         # Alternative until we can get both names from settings
