@@ -1,3 +1,5 @@
+import time
+
 from reports import DataStoreManager
 from reports.report_utils import generate_report
 from utils import Singleton, Logger, Manager

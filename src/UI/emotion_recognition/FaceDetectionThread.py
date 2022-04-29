@@ -300,41 +300,38 @@ class FaceDetectionThread(QObject):
                     (x, y, width, height) = face_utils.rect_to_bb(rects[0])
                     face = gray[y:y + height, x:x + width]
 
-                    if not is_face_detected(face):
-                        self._frames.append(frame)
-                        continue
+                    if is_face_detected(face):
+                        # Zoom on extracted face
+                        face = zoom(face, (self._shape_x / face.shape[0], self._shape_y / face.shape[1]))
 
-                    # Zoom on extracted face
-                    face = zoom(face, (self._shape_x / face.shape[0], self._shape_y / face.shape[1]))
+                        # Cast type float
+                        face = face.astype(np.float32)
 
-                    # Cast type float
-                    face = face.astype(np.float32)
+                        # Scale
+                        face /= float(face.max(initial=None))
+                        face = np.reshape(face.flatten(), (1, 48, 48, 1))
 
-                    # Scale
-                    face /= float(face.max())
-                    face = np.reshape(face.flatten(), (1, 48, 48, 1))
+                        self.video_prediction.queue_data(face)
+                        prediction = self._manager.video_model.predict(face)
+                        if prediction is None:
+                            continue
 
-                    self.video_prediction.queue_data(face)
-                    prediction = self._manager.video_model.predict(face)
-                    if prediction is None:
-                        continue
+                        frame_to_predictions.append((frame, prediction[0]))
+                        prediction_emotion = self.get_label(np.argmax(prediction[0]))
+                        predictions_map[prediction_emotion] = predictions_map[prediction_emotion] + 1 \
+                            if prediction_emotion in predictions_map else 1
 
-                    frame_to_predictions.append((frame, prediction[0]))
-                    prediction_emotion = self.get_label(np.argmax(prediction[0]))
-                    predictions_map[prediction_emotion] = predictions_map[prediction_emotion] + 1 \
-                        if prediction_emotion in predictions_map else 1
-
-                    self.draw_predictions(frame, prediction)
-                    self.draw_rectangle(frame, x, y, width, height)
-                    self.draw_main_prediction(frame, prediction, x, y, width)
-                    self.draw_if_open_eyes(frame, shape)
-                    self.draw_if_glasses(frame, shape_img, gray)
-                    self.draw_eyes(frame, shape)
-                    self.draw_nose(frame, shape)
-                    self.draw_mouth(frame, shape)
-                    self.draw_jaw(frame, shape)
-                    self.draw_eyebrows(frame, shape)
-                    self.draw_face_dots(frame, shape)
+                        self.draw_predictions(frame, prediction)
+                        self.draw_rectangle(frame, x, y, width, height)
+                        self.draw_main_prediction(frame, prediction, x, y, width)
+                        self.draw_if_open_eyes(frame, shape)
+                        self.draw_if_glasses(frame, shape_img, gray)
+                        self.draw_eyes(frame, shape)
+                        self.draw_nose(frame, shape)
+                        self.draw_mouth(frame, shape)
+                        self.draw_jaw(frame, shape)
+                        self.draw_eyebrows(frame, shape)
+                        self.draw_face_dots(frame, shape)
 
                 self._frames.append(frame)
 
