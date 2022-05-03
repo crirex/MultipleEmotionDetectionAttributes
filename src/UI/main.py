@@ -111,6 +111,8 @@ class MainWindow(QMainWindow):
         self._state_manager.button_home_clicked(button, button_name, widgets.home)
 
     def button_reports_click(self, button, button_name):
+        # to be changed with the username
+        self.ui.tableWidget.load_reports("Test_interviewee_name")
         self._state_manager.button_reports_clicked(button, button_name, widgets.widgets)
 
     def button_recognition_click(self, button, button_name):
