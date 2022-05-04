@@ -27,7 +27,7 @@ class ReportTable(QTableWidget):
     def _reset(self):
         self._reports = []
         self.table_row = 0
-        self.clear()
+        # self.clear()
         self.setRowCount(0)
 
     def load_reports(self, candidate_name):
@@ -54,7 +54,11 @@ class ReportTable(QTableWidget):
         self.table_row += 1
 
     def delete_report(self, report_index):
-        print("Delete " + str(report_index))
+        if report_index >= 0 and len(self._reports) > 0:
+            report_to_remove = self._reports[report_index]
+            self._reports.remove(report_to_remove)
+            self.removeRow(report_index)
+            self._mongo_db.remove_report(report_to_remove)
 
     def export_report(self, report_index):
         print("Export " + str(report_index))
@@ -62,7 +66,7 @@ class ReportTable(QTableWidget):
     def mouseDoubleClickEvent(self, event) -> None:
         super().mouseDoubleClickEvent(event)
         index = self.indexAt(event.pos())
-        if len(self._reports) > 0 and index.row() < len(self._reports):
+        if len(self._reports) > 0 and index.row() >= 0:
             print(str(index.row()) + " " + str(self._reports[index.row()]))
             # print(index.model())
 

@@ -8,3 +8,6 @@ class MongoDbCollection:
 
     def get_all_reports(self):
         return [report for report in self._collection.find()]
+
+    def delete_report(self, report):
+        self._collection.delete_one(report)
