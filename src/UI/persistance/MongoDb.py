@@ -30,10 +30,11 @@ class MongoDb(metaclass=Singleton):
         return self._mongo_fs_collection.put(pickle.dumps(predictions, protocol=2))
 
     def get_all_reports_of_candidate(self, name):
-        if name not in self._mongo_collections:
+        collections_name = self._mongo_database.list_collection_names()
+        if name not in collections_name:
             return None
 
-        return self._mongo_collections.get(name).get_all_reports()
+        return self.get_collection(name).get_all_reports()
 
     def get_all_reports(self):
         collections_name = self._mongo_database.list_collection_names()
@@ -52,3 +53,8 @@ class MongoDb(metaclass=Singleton):
 
         predictions = pickle.loads(binary_data)
         return predictions
+
+    def remove_report(self, report, interviewee_name="Test_interviewee_name"):
+        predictions_id = report["predictions_id"]
+        self.get_collection(interviewee_name).delete_report(report)
+        self._mongo_fs_collection.delete(predictions_id)

@@ -16,3 +16,4 @@
 
 from . custom_grips import CustomGrip
 from . audio_plotting import AudioPlotter
+from . report_table import ReportTable
