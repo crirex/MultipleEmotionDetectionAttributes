@@ -94,6 +94,7 @@ class VoiceEmotionDetectionThread(QObject):
             if not os.path.exists(path):
                 os.makedirs(path)
 
+            wave_utils.write_wave(full_path, self._frames)
             self._frames.clear()
 
         except Exception as ex:

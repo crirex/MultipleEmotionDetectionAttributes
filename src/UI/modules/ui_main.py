@@ -14,6 +14,7 @@ from PySide6.QtWidgets import *
 
 from widgets.audio_plotting import AudioPlotter
 from widgets.report_table import ReportTable
+from widgets.report_visualize import ReportVisualize
 
 from .resources_rc import *
 
@@ -937,6 +938,72 @@ class Ui_MainWindow(object):
         self.stackedWidget = QStackedWidget(self.pagesContainer)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setStyleSheet(u"background: transparent;")
+        self.report_view = ReportVisualize()
+        self.report_view.setObjectName(u"report_view")
+        self.report_view.setStyleSheet(u"b")
+        self.grid_report_view_layout = QGridLayout(self.report_view)
+        self.grid_report_view_layout.setObjectName(u"grid_report_view_layout")
+        self.verticalLayout_9 = QVBoxLayout()
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.text_speech = QTextEdit(self.report_view)
+        self.text_speech.setObjectName(u"text_speech")
+        sizePolicy.setHeightForWidth(self.text_speech.sizePolicy().hasHeightForWidth())
+        self.text_speech.setSizePolicy(sizePolicy)
+        self.text_speech.setStyleSheet(u"background-color: rgb(33, 37, 43);")
+
+        self.verticalLayout_9.addWidget(self.text_speech)
+
+        self.horizontalLayout_10 = QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.play_button = QPushButton(self.report_view)
+        self.play_button.setObjectName(u"play_button")
+        icon4 = QIcon()
+        icon4.addFile(u":/icons/images/icons/cil-media-play.png", QSize(), QIcon.Normal, QIcon.On)
+        self.play_button.setIcon(icon4)
+
+        self.horizontalLayout_10.addWidget(self.play_button)
+
+        self.report_slider = QSlider(self.report_view)
+        self.report_slider.setObjectName(u"report_slider")
+        self.report_slider.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_10.addWidget(self.report_slider)
+
+        self.verticalLayout_9.addLayout(self.horizontalLayout_10)
+
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.label = QLabel(self.report_view)
+        self.label.setObjectName(u"label")
+        self.label.setAlignment(Qt.AlignLeading | Qt.AlignLeft | Qt.AlignTop)
+
+        self.horizontalLayout_9.addWidget(self.label)
+
+        self.label_2 = QLabel(self.report_view)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setAlignment(Qt.AlignRight | Qt.AlignTop | Qt.AlignTrailing)
+
+        self.horizontalLayout_9.addWidget(self.label_2)
+
+        self.verticalLayout_9.addLayout(self.horizontalLayout_9)
+
+        self.grid_report_view_layout.addLayout(self.verticalLayout_9, 1, 0, 1, 1)
+
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.audio_label_report = QLabel(self.report_view)
+        self.audio_label_report.setObjectName(u"audio_label_report")
+
+        self.gridLayout.addWidget(self.audio_label_report, 0, 1, 1, 1)
+
+        self.video_label_report = QLabel(self.report_view)
+        self.video_label_report.setObjectName(u"video_label_report")
+
+        self.gridLayout.addWidget(self.video_label_report, 0, 0, 1, 1)
+
+        self.grid_report_view_layout.addLayout(self.gridLayout, 0, 0, 1, 1)
+
+        self.stackedWidget.addWidget(self.report_view)
         self.home = QWidget()
         self.home.setObjectName(u"home")
         self.home.setEnabled(True)
@@ -1027,7 +1094,7 @@ class Ui_MainWindow(object):
         self.tableWidget.setShowGrid(True)
         self.tableWidget.setGridStyle(Qt.SolidLine)
         self.tableWidget.setSortingEnabled(False)
-        self.tableWidget.horizontalHeader().setVisible(True)
+        self.tableWidget.horizontalHeader().setVisible(False)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
         self.tableWidget.horizontalHeader().setDefaultSectionSize(200)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -1214,7 +1281,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
 
         QMetaObject.connectSlotsByName(MainWindow)
         # setupUi
@@ -1266,6 +1333,11 @@ class Ui_MainWindow(object):
         self.closeAppBtn.setToolTip(QCoreApplication.translate("MainWindow", u"Close", None))
         # endif // QT_CONFIG(tooltip)
         self.closeAppBtn.setText("")
+        self.play_button.setText("")
+        self.label.setText(QCoreApplication.translate("MainWindow", u"CurrentTime", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"TotalTime", None))
+        self.audio_label_report.setText("")
+        self.video_label_report.setText("")
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Interviewee Name", None));
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)

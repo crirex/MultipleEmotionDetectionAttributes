@@ -208,6 +208,9 @@ class UIFunctions(MainWindow):
 
     # RESET SELECTION
     def resetStyle(self, widget):
+        if widget is None:
+            return
+
         for w in self.ui.topMenu.findChildren(QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(UIFunctions.deselectMenu(w.styleSheet()))
