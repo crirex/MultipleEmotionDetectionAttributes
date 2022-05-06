@@ -13,7 +13,7 @@ from transitions import MachineError
 
 from emotion_recognition import FaceDetectionThread
 from modules import *
-from speech_to_text import GoogleSpeechToText
+from speech_to_text import GoogleSpeechToText, TextEmotionDetection
 from utils import Manager
 from utils.Logger import Logger
 from utils.StateManager import StateManager
@@ -161,6 +161,9 @@ class MainWindow(QMainWindow):
         # Audio
         self.ui.audioPlotterWidget.stop_prediction()
 
+        print(self.ui.emotioTextEdit.toPlainText())
+        print(TextEmotionDetection().run(self.ui.emotioTextEdit.toPlainText(), model_name="Personality_traits_NN"))
+
     def button_pause_recognition_click(self, button, button_name):
         self._state_manager.button_pause_recognition_clicked(button, button_name)
 
@@ -227,6 +230,12 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    import nltk
+    nltk.download('stopwords')
+    nltk.download('averaged_perceptron_tagger')
+    nltk.download('wordnet')
+    nltk.download('omw-1.4')
+
     MainWindow.logger.log_info("Application starts")
     manager = Manager()
     manager.app = QApplication(sys.argv)
