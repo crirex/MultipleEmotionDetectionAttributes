@@ -73,10 +73,11 @@ class ReportTable(QTableWidget):
         index = self.indexAt(event.pos()).row()
 
         if len(self._reports) > 0 and index >= 0:
-            print(str(index) + " " + str(self._reports[index]))
-            # here we should initialize the view with references to the widgets
-            self._manager.window.ui.report_view.initialize_widgets()
-            self._state_manager.report_double_clicked(None, f"Line {index}", self._manager.window.ui.report_view, False)
+            report = self._reports[index]
+
+            predictions = self._mongo_db.get_prediction(report['predictions_id'])
+            self._manager.window.ui.report_view.initialize(self._manager.window, report, predictions)
+            self._state_manager.report_double_clicked(None, f"Line {index} clicked", self._manager.window.ui.report_view, False)
 
     def contextMenuEvent(self, event) -> None:
         action = self._menu.exec_(self.mapToGlobal(event.pos()))

@@ -1,7 +1,7 @@
 class ReportPredictions:
     def __init__(self):
         self.text = {}  # {Timestamp, Text}
-        self.text_predictions = None  # (First, Second)
+        self.text_predictions = {}  # (First, Second)
 
         self.audio_path = ''
         self.audio_predictions = {}  # {Timestamp, ([Frame], Prediction)}
@@ -17,3 +17,8 @@ class ReportPredictions:
         self.audio_predictions = data_store_manager.audio_predictions
 
         self.video_predictions = data_store_manager.video_predictions
+
+    def from_dict(self, prediction_dict):
+        for key in prediction_dict:
+            setattr(self, key, prediction_dict[key])
+        return self

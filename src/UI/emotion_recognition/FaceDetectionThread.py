@@ -1,7 +1,6 @@
 import cv2
 import dlib
 import numpy as np
-import time
 from PySide6.QtCore import QObject
 from imutils import face_utils
 from scipy.ndimage import zoom
@@ -14,6 +13,7 @@ from emotion_recognition.FaceEmotionDetectionThread import FaceEmotionDetectionT
 from reports import DataStoreManager
 from utils.Logger import Logger
 from utils.Manager import Manager
+from utils.Timer import Timer
 
 
 def eye_aspect_ratio(eye):
@@ -269,7 +269,9 @@ class FaceDetectionThread(QObject):
 
         predictions_map = {}
         frame_to_predictions = []
-        start_time = time.time()
+        timer = Timer()
+        timer.start()
+        start_time = timer.record_time()
         try:
             while self._is_running:
                 _, frame = self._manager.active_camera.read()
@@ -278,20 +280,21 @@ class FaceDetectionThread(QObject):
                 rects = self._face_detect(gray, 0)
 
                 if len(predictions_map) == 0:
-                    start_time = time.time()
+                    start_time = timer.record_time()
 
-                current_time = time.time()
+                current_time = timer.record_time()
                 seconds_passed = current_time - start_time
+                seconds = timer.record_time()
                 if seconds_passed > 4 and len(predictions_map) > 0:
                     max_prediction = max(predictions_map, key=predictions_map.get)
                     print(f"Video prediction: {max_prediction}")
                     highest_class_index = [k for k, v in self._classes.items() if v == max_prediction][0]
                     representative_frame = get_representative_frame(frame_to_predictions, highest_class_index)
-                    self._data_store_manager.insert_video((current_time, (representative_frame, max_prediction)))
+                    self._data_store_manager.insert_video((seconds, (representative_frame, max_prediction)))
 
                     predictions_map.clear()
                     frame_to_predictions.clear()
-                    start_time = time.time()
+                    start_time = timer.record_time()
 
                 if len(rects) and (not self._is_paused or len(predictions_map) > 0):
                     shape_img = self._manager.video_predictor_landmarks(gray, rects[0])
@@ -337,6 +340,8 @@ class FaceDetectionThread(QObject):
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
+
+            timer.stop()
         except Exception as ex:
             self._logger.log_error(ex)
             self._is_running = False
