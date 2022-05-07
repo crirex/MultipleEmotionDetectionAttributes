@@ -1740,15 +1740,15 @@ p, li { white-space: pre-wrap; }
                          <item row="0" column="0">
                           <widget class="QLabel" name="video_label_report">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
                            </property>
                            <property name="minimumSize">
                             <size>
-                             <width>640</width>
-                             <height>480</height>
+                             <width>0</width>
+                             <height>0</height>
                             </size>
                            </property>
                            <property name="maximumSize">
@@ -2130,15 +2130,15 @@ p, li { white-space: pre-wrap; }
                          <item row="0" column="0">
                           <widget class="QLabel" name="labelVideo">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
                            </property>
                            <property name="minimumSize">
                             <size>
-                             <width>640</width>
-                             <height>480</height>
+                             <width>0</width>
+                             <height>0</height>
                             </size>
                            </property>
                            <property name="maximumSize">
@@ -2158,15 +2158,15 @@ p, li { white-space: pre-wrap; }
                          <item row="0" column="1">
                           <widget class="AudioPlotter" name="audioPlotterWidget" native="true">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
                            </property>
                            <property name="minimumSize">
                             <size>
-                             <width>640</width>
-                             <height>480</height>
+                             <width>0</width>
+                             <height>0</height>
                             </size>
                            </property>
                            <property name="maximumSize">
