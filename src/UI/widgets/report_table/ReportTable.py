@@ -68,6 +68,13 @@ class ReportTable(QTableWidget):
     def export_report(self, report_index):
         print("Export " + str(report_index))
 
+    def reset_report_view(self):
+        if self._manager.window is None:
+            return
+
+        report_view = self._manager.window.ui.report_view
+        report_view.reset()
+
     def mouseDoubleClickEvent(self, event) -> None:
         super().mouseDoubleClickEvent(event)
         index = self.indexAt(event.pos()).row()
@@ -76,6 +83,8 @@ class ReportTable(QTableWidget):
             report = self._reports[index]
 
             predictions = self._mongo_db.get_prediction(report['predictions_id'])
+
+            self.reset_report_view()
             self._manager.window.ui.report_view.initialize(self._manager.window, report, predictions)
             self._state_manager.report_double_clicked(None, f"Line {index} clicked", self._manager.window.ui.report_view, False)
 

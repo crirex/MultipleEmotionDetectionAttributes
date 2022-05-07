@@ -272,6 +272,7 @@ class FaceDetectionThread(QObject):
         timer = Timer()
         timer.start()
         start_time = timer.record_time()
+        target_time = 4 * 1000
         try:
             while self._is_running:
                 _, frame = self._manager.active_camera.read()
@@ -285,7 +286,7 @@ class FaceDetectionThread(QObject):
                 current_time = timer.record_time()
                 seconds_passed = current_time - start_time
                 seconds = timer.record_time()
-                if seconds_passed > 4 and len(predictions_map) > 0:
+                if seconds_passed > target_time and len(predictions_map) > 0:
                     max_prediction = max(predictions_map, key=predictions_map.get)
                     print(f"Video prediction: {max_prediction}")
                     highest_class_index = [k for k, v in self._classes.items() if v == max_prediction][0]

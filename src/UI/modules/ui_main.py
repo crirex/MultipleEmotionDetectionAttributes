@@ -22,7 +22,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1280, 720)
+        MainWindow.resize(1353, 910)
         MainWindow.setMinimumSize(QSize(940, 560))
         self.styleSheet = QWidget(MainWindow)
         self.styleSheet.setObjectName(u"styleSheet")
@@ -993,11 +993,24 @@ class Ui_MainWindow(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.audio_label_report = QLabel(self.report_view)
         self.audio_label_report.setObjectName(u"audio_label_report")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.audio_label_report.sizePolicy().hasHeightForWidth())
+        self.audio_label_report.setSizePolicy(sizePolicy2)
+        self.audio_label_report.setMinimumSize(QSize(640, 480))
+        self.audio_label_report.setMaximumSize(QSize(640, 480))
+        self.audio_label_report.setAlignment(Qt.AlignCenter)
 
         self.gridLayout.addWidget(self.audio_label_report, 0, 1, 1, 1)
 
         self.video_label_report = QLabel(self.report_view)
         self.video_label_report.setObjectName(u"video_label_report")
+        sizePolicy2.setHeightForWidth(self.video_label_report.sizePolicy().hasHeightForWidth())
+        self.video_label_report.setSizePolicy(sizePolicy2)
+        self.video_label_report.setMinimumSize(QSize(640, 480))
+        self.video_label_report.setMaximumSize(QSize(640, 480))
+        self.video_label_report.setAlignment(Qt.AlignCenter)
 
         self.gridLayout.addWidget(self.video_label_report, 0, 0, 1, 1)
 
@@ -1040,11 +1053,11 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(4, __qtablewidgetitem4)
         self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setEnabled(True)
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
-        self.tableWidget.setSizePolicy(sizePolicy2)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
+        self.tableWidget.setSizePolicy(sizePolicy3)
         palette = QPalette()
         brush = QBrush(QColor(221, 221, 221, 255))
         brush.setStyle(Qt.SolidPattern)
@@ -1116,12 +1129,20 @@ class Ui_MainWindow(object):
         self.gridLayout_8.setObjectName(u"gridLayout_8")
         self.labelVideo = QLabel(self.new_page)
         self.labelVideo.setObjectName(u"labelVideo")
+        sizePolicy2.setHeightForWidth(self.labelVideo.sizePolicy().hasHeightForWidth())
+        self.labelVideo.setSizePolicy(sizePolicy2)
+        self.labelVideo.setMinimumSize(QSize(640, 480))
+        self.labelVideo.setMaximumSize(QSize(640, 480))
         self.labelVideo.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_8.addWidget(self.labelVideo, 0, 0, 1, 1)
 
         self.audioPlotterWidget = AudioPlotter(self.new_page)
         self.audioPlotterWidget.setObjectName(u"audioPlotterWidget")
+        sizePolicy2.setHeightForWidth(self.audioPlotterWidget.sizePolicy().hasHeightForWidth())
+        self.audioPlotterWidget.setSizePolicy(sizePolicy2)
+        self.audioPlotterWidget.setMinimumSize(QSize(640, 480))
+        self.audioPlotterWidget.setMaximumSize(QSize(640, 480))
 
         self.gridLayout_8.addWidget(self.audioPlotterWidget, 0, 1, 1, 1)
 
@@ -1142,11 +1163,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.cancelButton = QPushButton(self.new_page)
         self.cancelButton.setObjectName(u"cancelButton")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.cancelButton.sizePolicy().hasHeightForWidth())
-        self.cancelButton.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.cancelButton.sizePolicy().hasHeightForWidth())
+        self.cancelButton.setSizePolicy(sizePolicy4)
         self.cancelButton.setMinimumSize(QSize(150, 0))
         self.cancelButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
 
@@ -1154,8 +1175,8 @@ class Ui_MainWindow(object):
 
         self.pauseButton = QPushButton(self.new_page)
         self.pauseButton.setObjectName(u"pauseButton")
-        sizePolicy3.setHeightForWidth(self.pauseButton.sizePolicy().hasHeightForWidth())
-        self.pauseButton.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.pauseButton.sizePolicy().hasHeightForWidth())
+        self.pauseButton.setSizePolicy(sizePolicy4)
         self.pauseButton.setMinimumSize(QSize(150, 0))
         self.pauseButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
 
@@ -1163,8 +1184,8 @@ class Ui_MainWindow(object):
 
         self.startButton = QPushButton(self.new_page)
         self.startButton.setObjectName(u"startButton")
-        sizePolicy3.setHeightForWidth(self.startButton.sizePolicy().hasHeightForWidth())
-        self.startButton.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.startButton.sizePolicy().hasHeightForWidth())
+        self.startButton.setSizePolicy(sizePolicy4)
         self.startButton.setMinimumSize(QSize(150, 0))
         self.startButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
 

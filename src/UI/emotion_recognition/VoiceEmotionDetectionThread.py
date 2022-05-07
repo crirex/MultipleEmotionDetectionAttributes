@@ -66,6 +66,7 @@ class VoiceEmotionDetectionThread(QObject):
         path = "./candidate_speech/"
         full_path = path + str(uuid.uuid4()) + ".wav"
         self._data_store_manager.audio_path = full_path
+        target_time = 4 * 1000
         try:
             while self._audio_input_stream.is_active():
                 data = self._audio_input_stream.read(self._frames_per_buffer)
@@ -87,7 +88,7 @@ class VoiceEmotionDetectionThread(QObject):
                 seconds_passed = current_time - start_time
                 seconds = timer.record_time()
 
-                if seconds_passed > 4:
+                if seconds_passed > target_time:
                     data = self.read_intermediate_wave(wave_utils)
                     self.voice_prediction.queue_data((seconds, data))
 

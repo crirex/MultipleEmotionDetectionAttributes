@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1213</width>
-    <height>745</height>
+    <width>1353</width>
+    <height>910</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1636,7 +1636,7 @@ p, li { white-space: pre-wrap; }
                       <string notr="true">background: transparent;</string>
                      </property>
                      <property name="currentIndex">
-                      <number>0</number>
+                      <number>3</number>
                      </property>
                      <widget class="ReportVisualize" name="report_view">
                       <property name="styleSheet">
@@ -1711,15 +1711,57 @@ p, li { white-space: pre-wrap; }
                         <layout class="QGridLayout" name="gridLayout">
                          <item row="0" column="1">
                           <widget class="QLabel" name="audio_label_report">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
                            <property name="text">
                             <string/>
+                           </property>
+                           <property name="alignment">
+                            <set>Qt::AlignCenter</set>
                            </property>
                           </widget>
                          </item>
                          <item row="0" column="0">
                           <widget class="QLabel" name="video_label_report">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
                            <property name="text">
                             <string/>
+                           </property>
+                           <property name="alignment">
+                            <set>Qt::AlignCenter</set>
                            </property>
                           </widget>
                          </item>
@@ -2087,6 +2129,24 @@ p, li { white-space: pre-wrap; }
                         <layout class="QGridLayout" name="gridLayout_8">
                          <item row="0" column="0">
                           <widget class="QLabel" name="labelVideo">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
                            <property name="text">
                             <string>Video</string>
                            </property>
@@ -2096,7 +2156,26 @@ p, li { white-space: pre-wrap; }
                           </widget>
                          </item>
                          <item row="0" column="1">
-                          <widget class="AudioPlotter" name="audioPlotterWidget" native="true"/>
+                          <widget class="AudioPlotter" name="audioPlotterWidget" native="true">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>640</width>
+                             <height>480</height>
+                            </size>
+                           </property>
+                          </widget>
                          </item>
                         </layout>
                        </item>
