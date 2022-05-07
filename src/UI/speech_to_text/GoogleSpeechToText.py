@@ -49,7 +49,8 @@ class GoogleSpeechToText(QObject):
                 try:
                     audio_text = self._recognizer.listen(source)
                     text = self._recognizer.recognize_google(audio_text)
-                    self._manager.window.ui.emotioTextEdit.insertPlainText(text + ". ")
+                    # self._manager.window.ui.emotioTextEdit.insertPlainText(text + ". ")
+                    self._textPredictions.append(text)
                 except OSError as ex:
                     print(ex.args)
                     self._logger.log_error(ex)
