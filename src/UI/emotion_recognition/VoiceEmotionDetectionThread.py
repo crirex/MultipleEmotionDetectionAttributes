@@ -8,6 +8,7 @@ import os
 from emotion_recognition.VoiceEmotionPredictionThread import VoiceEmotionPredictionThread
 from reports import DataStoreManager
 from utils import Manager, Logger
+from utils.Timer import Timer
 from utils.Wave import WaveUtils
 
 
@@ -58,7 +59,9 @@ class VoiceEmotionDetectionThread(QObject):
         self._audio_input_stream.start_stream()
 
         wave_utils = WaveUtils()
-        start_time = time.time()
+        timer = Timer()
+        timer.start()
+        start_time = timer.record_time()
         time_format = "%Y-%m-%d %H:%M:%S"
         path = "./candidate_speech/"
         full_path = path + str(uuid.uuid4()) + ".wav"
@@ -69,7 +72,7 @@ class VoiceEmotionDetectionThread(QObject):
                 self._frames.append(data)
 
                 if self._is_paused and len(self._frames_to_predict) == 0:
-                    start_time = time.time()
+                    start_time = timer.record_time()
                     continue
 
                 latest_prediction = self.voice_prediction.get_latest_prediction()
@@ -80,20 +83,24 @@ class VoiceEmotionDetectionThread(QObject):
                     print(str_prediction)
 
                 self._frames_to_predict.append(data)
-                current_time = time.time()
+                current_time = timer.record_time()
                 seconds_passed = current_time - start_time
+                seconds = timer.record_time()
+
                 if seconds_passed > 4:
                     data = self.read_intermediate_wave(wave_utils)
-                    self.voice_prediction.queue_data((current_time, data))
+                    self.voice_prediction.queue_data((seconds, data))
 
                     self._frames_to_predict.clear()
-                    start_time = time.time()
+                    start_time = timer.record_time()
 
             self.voice_prediction.abort()
+            timer.stop()
 
             if not os.path.exists(path):
                 os.makedirs(path)
 
+            wave_utils.write_wave(full_path, self._frames)
             self._frames.clear()
 
         except Exception as ex:

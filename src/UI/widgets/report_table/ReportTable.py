@@ -4,6 +4,8 @@ import time
 import datetime
 
 from persistance import MongoDb
+from utils.StateManager import StateManager
+from utils import Manager
 
 time_format = "%Y-%m-%d %H:%M:%S"
 
@@ -13,20 +15,23 @@ class ReportTable(QTableWidget):
         super().__init__(parent=parent)
         self._mongo_db = MongoDb()
         self._reports = []
-        self.table_row = 0
+        self._table_row = 0
 
-        self.menu = QMenu(self)
-        self.delete_action = self.menu.addAction("Delete Report")
-        self.export_action = self.menu.addAction("Export Report")
+        self._menu = QMenu(self)
+        self._delete_action = self._menu.addAction("Delete Report")
+        self._export_action = self._menu.addAction("Export Report")
 
-        self.action_to_func = {
-            self.delete_action: self.delete_report,
-            self.export_action: self.export_report
+        self._action_to_func = {
+            self._delete_action: self.delete_report,
+            self._export_action: self.export_report
         }
+
+        self._manager = Manager()
+        self._state_manager = StateManager()
 
     def _reset(self):
         self._reports = []
-        self.table_row = 0
+        self._table_row = 0
         # self.clear()
         self.setRowCount(0)
 
@@ -41,17 +46,17 @@ class ReportTable(QTableWidget):
             self.insert_report(report)
 
     def insert_report(self, report):
-        self.setItem(self.table_row, 0,
+        self.setItem(self._table_row, 0,
                      QTableWidgetItem(report["interviewee_name"]))
-        self.setItem(self.table_row, 1,
+        self.setItem(self._table_row, 1,
                      QTableWidgetItem(report["interviewer_name"]))
-        self.setItem(self.table_row, 2,
+        self.setItem(self._table_row, 2,
                      QTableWidgetItem(time.strftime(time_format, time.localtime(report["interview_start_date"]))))
-        self.setItem(self.table_row, 3,
+        self.setItem(self._table_row, 3,
                      QTableWidgetItem(time.strftime(time_format, time.localtime(report["interview_end_date"]))))
-        self.setItem(self.table_row, 4,
+        self.setItem(self._table_row, 4,
                      QTableWidgetItem(str(datetime.timedelta(seconds=report["interview_length"]))))
-        self.table_row += 1
+        self._table_row += 1
 
     def delete_report(self, report_index):
         if report_index >= 0 and len(self._reports) > 0:
@@ -65,12 +70,16 @@ class ReportTable(QTableWidget):
 
     def mouseDoubleClickEvent(self, event) -> None:
         super().mouseDoubleClickEvent(event)
-        index = self.indexAt(event.pos())
-        if len(self._reports) > 0 and index.row() >= 0:
-            print(str(index.row()) + " " + str(self._reports[index.row()]))
-            # print(index.model())
+        index = self.indexAt(event.pos()).row()
+
+        if len(self._reports) > 0 and index >= 0:
+            report = self._reports[index]
+
+            predictions = self._mongo_db.get_prediction(report['predictions_id'])
+            self._manager.window.ui.report_view.initialize(self._manager.window, report, predictions)
+            self._state_manager.report_double_clicked(None, f"Line {index} clicked", self._manager.window.ui.report_view, False)
 
     def contextMenuEvent(self, event) -> None:
-        action = self.menu.exec_(self.mapToGlobal(event.pos()))
+        action = self._menu.exec_(self.mapToGlobal(event.pos()))
         index = self.indexAt(event.pos()).row()
-        self.action_to_func[action](index)
+        self._action_to_func[action](index)

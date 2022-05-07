@@ -48,7 +48,8 @@ class MainWindow(QMainWindow):
 
         self.ui.setupUi(self)
 
-        self._state_manager = StateManager(self)
+        self._state_manager = StateManager()
+        self._state_manager.set_main_window(self)
         self._manager = Manager()
 
         global widgets

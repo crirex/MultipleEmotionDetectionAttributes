@@ -13,15 +13,11 @@ def log_button_click(button, button_name):
 
 
 class StateManager(metaclass=Singleton):
-    # To be added: Reports, Report_View, Report_Delete
-    states = ['Home', 'Recognition', 'Recognition_Start', 'Recognition_Pause', 'Recognition_Stop', 'Reports', 'Exit']
+    states = ['Home', 'Recognition', 'Recognition_Start', 'Recognition_Pause', 'Recognition_Stop',
+              'Reports', 'Report_View', 'Exit']
     logger = Logger()
 
-    def __init__(self, main_window):
-        self._main_window = main_window
-        global widgets
-        widgets = self._main_window.ui
-
+    def __init__(self):
         self._manager = Manager()
         self._data_store_manager = DataStoreManager()
 
@@ -31,16 +27,25 @@ class StateManager(metaclass=Singleton):
                                            before="change_frame")
         self._state_machine.add_transition(trigger='button_recognition_clicked', source='Reports', dest='Recognition',
                                            before="change_frame")
+        self._state_machine.add_transition(trigger='button_recognition_clicked', source='Report_View', dest='Recognition',
+                                           before="change_frame")
 
         self._state_machine.add_transition(trigger='button_exit_clicked', source='Home', dest='Exit', after="exit_app")
         self._state_machine.add_transition(trigger='button_exit_clicked', source='Recognition', dest='Exit',
                                            after="exit_app")
         self._state_machine.add_transition(trigger='button_exit_clicked', source='Reports', dest='Exit',
                                            after="exit_app")
+        self._state_machine.add_transition(trigger='button_exit_clicked', source='Report_View', dest='Exit',
+                                           after="exit_app")
+
+        self._state_machine.add_transition(trigger='report_double_clicked', source='Reports', dest='Report_View',
+                                           before='change_frame')
 
         self._state_machine.add_transition(trigger='button_home_clicked', source='Recognition', dest='Home',
                                            before="change_frame")
         self._state_machine.add_transition(trigger='button_home_clicked', source='Reports', dest='Home',
+                                           before="change_frame")
+        self._state_machine.add_transition(trigger='button_home_clicked', source='Report_View', dest='Home',
                                            before="change_frame")
 
         self._state_machine.add_transition(trigger='button_start_recognition_clicked', source='Recognition',
@@ -60,18 +65,25 @@ class StateManager(metaclass=Singleton):
         self._state_machine.add_transition(trigger='report_generated', source='Recognition_Stop', dest='Recognition',
                                            after='after_report_generated')
 
-        # TO DO: add transition from/to Reports(done), Reports_View(When you click a report,
-        # it will open/switched to a frame with infos about that report)
         self._state_machine.add_transition(trigger='button_reports_clicked', source='Home', dest='Reports',
                                            before="change_frame")
         self._state_machine.add_transition(trigger='button_reports_clicked', source='Recognition', dest='Reports',
                                            before="change_frame")
+        self._state_machine.add_transition(trigger='button_reports_clicked', source='Report_View', dest='Reports',
+                                           before="change_frame")
 
-    def change_frame(self, button, button_name, widget):
+    def set_main_window(self, main_window):
+        self._main_window = main_window
+        global widgets
+        widgets = self._main_window.ui
+
+    def change_frame(self, button, button_name, widget, reset_style=True):
         log_button_click(button, button_name)
         widgets.stackedWidget.setCurrentWidget(widget)
-        self._main_window.reset_style(button_name)
-        button.setStyleSheet(self._main_window.select_menu_style(button))
+
+        if reset_style:
+            self._main_window.reset_style(button_name)
+            button.setStyleSheet(self._main_window.select_menu_style(button))
 
     def exit_app(self, button, button_name):
         log_button_click(button, button_name)
