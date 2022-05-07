@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
 
         self._video_timer = QTimer()
+        self._text_timer = QTimer()
 
         self.ui.setupUi(self)
 
@@ -130,6 +131,10 @@ class MainWindow(QMainWindow):
         self._video_timer.timeout.connect(self.display_video_stream)
         self._video_timer.start(30)
 
+        # Text
+        self._text_timer.timeout.connect(self.display_new_text)
+        self._text_timer.start(500)
+
         # Audio
         self.ui.audioPlotterWidget.start_plotting()
 
@@ -152,6 +157,7 @@ class MainWindow(QMainWindow):
     def stop_recognition(self):
         # Video
         self._video_timer.stop()
+        self._text_timer.stop()
         self.face_detection_thread.stop_running()
 
         # Speech to text
@@ -194,6 +200,11 @@ class MainWindow(QMainWindow):
         qim = ImageQt.ImageQt(img)
         pm = QPixmap.fromImage(qim)
         self.ui.labelVideo.setPixmap(pm)
+
+    def display_new_text(self):
+        text = self.speech_to_text_thread.get_new_text()
+        if text is not None:
+            self._manager.window.ui.emotioTextEdit.insertPlainText(text + ". ")
 
     def start_thread(self, worker, name):
         thread = QThread()
