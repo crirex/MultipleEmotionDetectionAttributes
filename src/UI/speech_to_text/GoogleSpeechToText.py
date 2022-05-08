@@ -7,6 +7,10 @@ import time
 from utils import Manager
 from utils.Logger import Logger
 
+from utils.Timer import Timer
+
+from reports import DataStoreManager
+
 
 class GoogleSpeechToText(QObject):
     def __init__(self, parent=None):
@@ -18,6 +22,7 @@ class GoogleSpeechToText(QObject):
         self._recognizer = sr.Recognizer()
         self._textPredictions = []
         self._manager = Manager()
+        self._data_store_manager = DataStoreManager()
 
         self._recognizer.energy_threshold = 1000  # minimum audio energy to consider for recording
         self._recognizer.pause_threshold = 0.1  # seconds of non-speaking audio before a phrase is considered complete
@@ -41,6 +46,9 @@ class GoogleSpeechToText(QObject):
         self._is_running = True
         self._is_paused = False
         with sr.Microphone() as source:
+            timer = Timer()
+            timer.start()
+
             self._recognizer.adjust_for_ambient_noise(source=source)
             while self._is_running:
                 if self._is_paused:
@@ -51,6 +59,8 @@ class GoogleSpeechToText(QObject):
                     text = self._recognizer.recognize_google(audio_text)
                     # self._manager.window.ui.emotioTextEdit.insertPlainText(text + ". ")
                     self._textPredictions.append(text)
+                    self._data_store_manager.insert_text([timer.record_time(), text])
+
                 except OSError as ex:
                     print(ex.args)
                     self._logger.log_error(ex)

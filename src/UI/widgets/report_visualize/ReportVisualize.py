@@ -42,9 +42,11 @@ class ReportVisualize(QWidget):
         self._predictions_data = ReportPredictions()
         self._video_predictions_intervals = IntervalTree()
         self._audio_predictions_intervals = IntervalTree()
+        self._text_intervals = IntervalTree()
         self._report = Report()
         self._video_label = None
         self._audio_label = None
+        self._text_label = None
         self._play_button = None
         # text area
         self._slider = None
@@ -67,8 +69,10 @@ class ReportVisualize(QWidget):
     def _initialize_predictions_interval(self):
         self._video_predictions_intervals = IntervalTree()
         self._audio_predictions_intervals = IntervalTree()
+        self._text_intervals = IntervalTree()
         _initialize_interval(self._video_predictions_intervals, self._predictions_data.video_predictions)
         _initialize_interval(self._audio_predictions_intervals, self._predictions_data.audio_predictions)
+        _initialize_interval(self._text_intervals, self._predictions_data.audio_predictions)
 
     def _initialize_widgets(self):
         self._slider = self._main_window.ui.report_slider
@@ -77,6 +81,7 @@ class ReportVisualize(QWidget):
 
         self._video_label = self._main_window.ui.video_label_report
         self._audio_label = self._main_window.ui.audio_label_report
+        self._text_label = self._main_window.ui.text_speech
 
         self._initialize_labels()
         self._initialize_time_labels()
@@ -86,6 +91,8 @@ class ReportVisualize(QWidget):
     def _initialize_labels(self):
         self._video_label.clear()
         self._audio_label.clear()
+        self._text_label.clear()
+        self._text_label.setPlainText('. '.join(self._predictions_data.text.values()))
 
     def _initialize_time_labels(self):
         str_start_time = str(datetime.timedelta(seconds=0))
