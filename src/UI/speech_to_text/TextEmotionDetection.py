@@ -10,7 +10,10 @@ from nltk.corpus import stopwords as sw, wordnet as wn
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 
+from reports import DataStoreManager
+
 labels = ['Extraversion', 'Neuroticism', 'Agreeableness', 'Conscientiousness', 'Openness']
+
 
 class TextEmotionDetection:
 
@@ -19,6 +22,7 @@ class TextEmotionDetection:
         self.max_features = 300
         self.embed_dim = 300
         self.NLTKPreprocessor = self.NLTKPreprocessor()
+        self._data_store_manager = DataStoreManager()
 
     class NLTKPreprocessor(BaseEstimator, TransformerMixin):
         """
@@ -174,4 +178,5 @@ class TextEmotionDetection:
         y_pred_normalized_mean = y_pred_mean - abs(y_pred_mean - np.mean([min(y_pred), max(y_pred)]))
         rounded_prediction = [i >= y_pred_normalized_mean for i in y_pred]
         final_prediction = dict(zip(labels, rounded_prediction))
+        self._data_store_manager.set_text_predictions(final_prediction)
         return final_prediction

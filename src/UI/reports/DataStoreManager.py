@@ -6,7 +6,7 @@ from utils.Singleton import Singleton
 class DataStoreManager(metaclass=Singleton):
     def __init__(self):
         self.text = {}  # {Timestamp, Text}
-        self.text_predictions = ()  # (First, Second)
+        self.text_predictions = {}  # {Emotion, True/False}
 
         self.audio_path = ''
         self.audio_predictions = {}  # {Timestamp, ([Frame], Prediction)} ?
