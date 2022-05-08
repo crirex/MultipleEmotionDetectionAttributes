@@ -1,6 +1,9 @@
+import os
+import uuid
+
 from PySide6.QtCore import QUrl, QSize
 from PySide6.QtWidgets import QWidget
-from PySide6.QtGui import QPixmap, QIcon, QTextDocument
+from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from reports import Report
@@ -11,6 +14,9 @@ from intervaltree import IntervalTree
 
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+import librosa
+import librosa.display
 from PIL import Image, ImageQt
 
 from utils.SyntaxHighlighter import SyntaxHighlighter
@@ -62,6 +68,8 @@ class ReportVisualize(QWidget):
 
         self._player = None
         self._syntax_highlighter = None
+
+        self._sample_rate = 16000
 
     def initialize(self, main_window, report_data, predictions):
         if main_window is None or report_data is None or predictions is None:
@@ -189,6 +197,9 @@ class ReportVisualize(QWidget):
                 continue
 
             if audio_data != self._audio_current_interval:
+                audio_frames = audio_data.data[0]
+                prediction = audio_data.data[1]
+                self._display_audio_plot(audio_frames, prediction)
                 self._audio_current_interval = audio_data
 
     def _slider_moved(self, value):
@@ -204,6 +215,34 @@ class ReportVisualize(QWidget):
         qim = ImageQt.ImageQt(img)
         pm = QPixmap.fromImage(qim)
         self._video_label.setPixmap(pm)
+
+    def _display_audio_plot(self, audio_frames, prediction):
+        mel_spect = np.abs(
+            librosa.stft(audio_frames, n_fft=512, window='hamming', win_length=256, hop_length=128)) ** 2
+
+        # Compute mel spectrogram
+        mel_spect = librosa.feature.melspectrogram(S=mel_spect, sr=16000, n_mels=128, fmax=4000)
+
+        # Compute log-mel spectrogram (Convert a power spectrogram (amplitude squared) to decibel (dB) units)
+        mel_spect = librosa.power_to_db(mel_spect, ref=np.max)
+
+        dpi = 96
+        x_pixels = 650
+        y_pixels = 700
+
+        id = str(uuid.uuid4())
+        path = "./temp/"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = f"./temp/{id}.png"
+
+        plt.figure(figsize=(x_pixels // dpi, y_pixels // dpi), dpi=dpi, frameon=False)
+        librosa.display.specshow(mel_spect, y_axis='linear')
+        plt.savefig(path, bbox_inches='tight', pad_inches=0, dpi=dpi)
+
+        pixmap = QPixmap(path)
+        os.remove(path)
+        self._audio_label.setPixmap(pixmap)
 
     def _slider_pressed(self):
         self._player.pause()
