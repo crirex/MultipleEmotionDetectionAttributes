@@ -1,6 +1,6 @@
 from PySide6.QtCore import QUrl, QSize
 from PySide6.QtWidgets import QWidget
-from PySide6.QtGui import QPixmap, QIcon
+from PySide6.QtGui import QPixmap, QIcon, QTextDocument
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from reports import Report
@@ -13,11 +13,13 @@ import cv2
 import numpy as np
 from PIL import Image, ImageQt
 
+from utils.SyntaxHighlighter import SyntaxHighlighter
 
-def _initialize_interval(interval_tree, predictions):
+
+def _initialize_interval(interval_tree, predictions, is_not_text=False):
     keys = list(predictions.keys())
 
-    if len(predictions) == 0:
+    if len(predictions) < 2:
         return
 
     threshold = 6000
@@ -27,7 +29,7 @@ def _initialize_interval(interval_tree, predictions):
         first = keys[index]
         last = keys[index + 1]
         delta = last - first
-        if delta > threshold:
+        if delta > threshold and not is_not_text:
             new_last = last - size_of_frame
             interval_tree[first:new_last] = None
             interval_tree[new_last:last] = predictions[last]
@@ -39,21 +41,27 @@ class ReportVisualize(QWidget):
     def __init__(self):
         super().__init__()
         self._main_window = None
+
         self._predictions_data = ReportPredictions()
         self._video_predictions_intervals = IntervalTree()
         self._audio_predictions_intervals = IntervalTree()
         self._text_intervals = IntervalTree()
+
+        self._video_current_interval = None
+        self._audio_current_interval = None
+        self._text_current_interval = None
+
         self._report = Report()
         self._video_label = None
         self._audio_label = None
-        self._text_label = None
+        self._text_area = None
         self._play_button = None
-        # text area
         self._slider = None
         self._current_time = None
         self._total_time = None
 
         self._player = None
+        self._syntax_highlighter = None
 
     def initialize(self, main_window, report_data, predictions):
         if main_window is None or report_data is None or predictions is None:
@@ -72,7 +80,7 @@ class ReportVisualize(QWidget):
         self._text_intervals = IntervalTree()
         _initialize_interval(self._video_predictions_intervals, self._predictions_data.video_predictions)
         _initialize_interval(self._audio_predictions_intervals, self._predictions_data.audio_predictions)
-        _initialize_interval(self._text_intervals, self._predictions_data.audio_predictions)
+        _initialize_interval(self._text_intervals, self._predictions_data.text, True)
 
     def _initialize_widgets(self):
         self._slider = self._main_window.ui.report_slider
@@ -81,7 +89,7 @@ class ReportVisualize(QWidget):
 
         self._video_label = self._main_window.ui.video_label_report
         self._audio_label = self._main_window.ui.audio_label_report
-        self._text_label = self._main_window.ui.text_speech
+        self._text_area = self._main_window.ui.text_speech
 
         self._initialize_labels()
         self._initialize_time_labels()
@@ -91,8 +99,11 @@ class ReportVisualize(QWidget):
     def _initialize_labels(self):
         self._video_label.clear()
         self._audio_label.clear()
-        self._text_label.clear()
-        self._text_label.setPlainText('. '.join(self._predictions_data.text.values()))
+        self._text_area.clear()
+
+        self._text_area.setPlainText('. '.join(self._predictions_data.text.values()))
+        self._syntax_highlighter = SyntaxHighlighter()
+        self._syntax_highlighter.setDocument(self._text_area.document())
 
     def _initialize_time_labels(self):
         str_start_time = str(datetime.timedelta(seconds=0))
@@ -149,10 +160,36 @@ class ReportVisualize(QWidget):
             if video_data.data is None:
                 self._video_label.setText("No data")
                 continue
-            video_frame = video_data.data[0]
-            prediction = video_data.data[1]
-            self._display_frame(video_frame)
-            break
+
+            if video_data != self._video_current_interval:
+                video_frame = video_data.data[0]
+                prediction = video_data.data[1]
+                self._display_frame(video_frame)
+                self._video_current_interval = video_data
+                break
+
+        for text_data in self._text_intervals[value]:
+            if text_data.data is None:
+                continue
+
+            if text_data != self._text_current_interval:
+                text = text_data.data
+                self._syntax_highlighter.set_text(text)
+                self._syntax_highlighter.highlightBlock(text)
+
+                # Hack in order to update text highlight
+                # self._text_area.insertPlainText(' ')
+
+                self._text_area.setPlainText(self._text_area.toPlainText())
+                self._text_current_interval = text_data
+                break
+
+        for audio_data in self._audio_predictions_intervals[value]:
+            if audio_data.data is None:
+                continue
+
+            if audio_data != self._audio_current_interval:
+                self._audio_current_interval = audio_data
 
     def _slider_moved(self, value):
         self._player.setPosition(value)
