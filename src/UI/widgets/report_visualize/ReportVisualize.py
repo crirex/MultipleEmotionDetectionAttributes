@@ -6,6 +6,8 @@ from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from reports import Report
 from reports.ReportPredictions import ReportPredictions
 
+import re
+import json
 import datetime
 from intervaltree import IntervalTree
 
@@ -90,6 +92,9 @@ class ReportVisualize(QWidget):
         self._video_label = self._main_window.ui.video_label_report
         self._audio_label = self._main_window.ui.audio_label_report
         self._text_area = self._main_window.ui.text_speech
+        self._current_video_prediction = self._main_window.ui.video_label_prediction
+        self._current_audio_prediction = self._main_window.ui.audio_label_prediction
+        self._text_prediction = self._main_window.ui.text_label_prediction
 
         self._initialize_labels()
         self._initialize_time_labels()
@@ -104,6 +109,10 @@ class ReportVisualize(QWidget):
         self._text_area.setPlainText('. '.join(self._predictions_data.text.values()))
         self._syntax_highlighter = SyntaxHighlighter()
         self._syntax_highlighter.setDocument(self._text_area.document())
+
+        # self._current_audio_prediction.setText("Audio Emotion Prediction: " + str_start_time)
+        self._text_prediction.setText(
+            "Text Emotions Predictions: " + re.sub("[{}']", "", str(self._predictions_data.text_predictions)))
 
     def _initialize_time_labels(self):
         str_start_time = str(datetime.timedelta(seconds=0))
@@ -136,8 +145,8 @@ class ReportVisualize(QWidget):
 
     def _media_state_changed(self, state):
         icon = QIcon()
-        path = u":/icons/images/icons/cil-media-pause.png" if self._player.playbackState() == QMediaPlayer.PlayingState \
-            else u":/icons/images/icons/cil-media-play.png"
+        path = u":/icons/images/icons/cil-media-pause.png" if \
+            self._player.playbackState() == QMediaPlayer.PlayingState else u":/icons/images/icons/cil-media-play.png"
         icon.addFile(path, QSize(), QIcon.Normal, QIcon.Off)
         self._play_button.setIcon(icon)
 
@@ -164,6 +173,7 @@ class ReportVisualize(QWidget):
             if video_data != self._video_current_interval:
                 video_frame = video_data.data[0]
                 prediction = video_data.data[1]
+                self._current_video_prediction.setText("Video Emotion Prediction: " + prediction)
                 self._display_frame(video_frame)
                 self._video_current_interval = video_data
                 break

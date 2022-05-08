@@ -61,7 +61,7 @@ class FaceDetectionThread(QObject):
 
         self._videoTextFont = cv2.QT_FONT_NORMAL
         self._videoTextFontScale = 0.5
-        self._videoTextColor = (255, 255, 255)
+        self._videoTextColor = (255, 150, 0)
         self._facialRectangleColor = (0, 255, 0)
         self._facialDotsColor = (0, 0, 255)
         self._videoTextThickness = 0
