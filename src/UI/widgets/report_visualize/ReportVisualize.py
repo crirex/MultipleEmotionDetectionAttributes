@@ -70,6 +70,7 @@ class ReportVisualize(QWidget):
 
         self._player = None
         self._syntax_highlighter = None
+        self._slider_is_pressed = False
 
         self._sample_rate = 16000
 
@@ -201,15 +202,16 @@ class ReportVisualize(QWidget):
                 self._text_current_interval = text_data
                 break
 
-        for audio_data in self._audio_predictions_intervals[value]:
-            if audio_data.data is None:
-                continue
+        if not self._slider_is_pressed:
+            for audio_data in self._audio_predictions_intervals[value]:
+                if audio_data.data is None:
+                    continue
 
-            if audio_data != self._audio_current_interval:
-                audio_frames = audio_data.data[0]
-                prediction = audio_data.data[1]
-                self._display_audio_plot(audio_frames, prediction)
-                self._audio_current_interval = audio_data
+                if audio_data != self._audio_current_interval:
+                    audio_frames = audio_data.data[0]
+                    prediction = audio_data.data[1]
+                    self._display_audio_plot(audio_frames, prediction)
+                    self._audio_current_interval = audio_data
 
     def _slider_moved(self, value):
         self._player.setPosition(value)
@@ -256,10 +258,12 @@ class ReportVisualize(QWidget):
 
     def _slider_pressed(self):
         self._player.pause()
+        self._slider_is_pressed = True
         state = self._player.playbackState()
         self._media_state_changed(state)
 
     def _slider_released(self):
+        self._slider_is_pressed = False
         if self._player.position() != 0:
             self._player.play()
             state = self._player.playbackState()

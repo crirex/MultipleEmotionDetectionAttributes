@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainwrFICG.ui'
+## Form generated from reading UI file 'mainBPJwTQ.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.2.2
 ##
@@ -12,12 +12,12 @@ from PySide6.QtCore import Qt, QSize, QCoreApplication, QMetaObject, QRect
 from PySide6.QtGui import QColor, QIcon, QFont, QCursor, QPalette, QBrush
 from PySide6.QtWidgets import *
 
-
 from widgets.audio_plotting import AudioPlotter
 from widgets.report_table import ReportTable
 from widgets.report_visualize import ReportVisualize
 
 from .resources_rc import *
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):

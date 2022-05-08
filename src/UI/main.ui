@@ -1723,15 +1723,15 @@ p, li { white-space: pre-wrap; }
                          <item row="0" column="1">
                           <widget class="QLabel" name="audio_label_report">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
                            </property>
                            <property name="minimumSize">
                             <size>
-                             <width>640</width>
-                             <height>480</height>
+                             <width>0</width>
+                             <height>0</height>
                             </size>
                            </property>
                            <property name="maximumSize">
