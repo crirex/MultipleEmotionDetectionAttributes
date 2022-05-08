@@ -118,7 +118,6 @@ class ReportVisualize(QWidget):
         self._syntax_highlighter = SyntaxHighlighter()
         self._syntax_highlighter.setDocument(self._text_area.document())
 
-        # self._current_audio_prediction.setText("Audio Emotion Prediction: " + str_start_time)
         self._text_prediction.setText(
             "Text Emotions Predictions: " + re.sub("[{}']", "", str(self._predictions_data.text_predictions)))
 
@@ -252,6 +251,7 @@ class ReportVisualize(QWidget):
 
         pixmap = QPixmap(path)
         os.remove(path)
+        self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
         self._audio_label.setPixmap(pixmap)
 
     def _slider_pressed(self):
