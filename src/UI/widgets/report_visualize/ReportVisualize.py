@@ -73,6 +73,7 @@ class ReportVisualize(QWidget):
         self._slider_is_pressed = False
 
         self._sample_rate = 16000
+        self._no_data_str = str()
 
     def initialize(self, main_window, report_data, predictions):
         if main_window is None or report_data is None or predictions is None:
@@ -176,6 +177,7 @@ class ReportVisualize(QWidget):
         for video_data in self._video_predictions_intervals[value]:
             if video_data.data is None:
                 self._video_label.setText("No data")
+                self._current_video_prediction.setText(self._no_data_str)
                 continue
 
             if video_data != self._video_current_interval:
@@ -205,12 +207,15 @@ class ReportVisualize(QWidget):
         if not self._slider_is_pressed:
             for audio_data in self._audio_predictions_intervals[value]:
                 if audio_data.data is None:
+                    self._audio_label.setText("No data")
+                    self._current_audio_prediction.setText(self._no_data_str)
                     continue
 
                 if audio_data != self._audio_current_interval:
                     audio_frames = audio_data.data[0]
                     prediction = audio_data.data[1]
                     self._display_audio_plot(audio_frames, prediction)
+                    self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
                     self._audio_current_interval = audio_data
 
     def _slider_moved(self, value):
@@ -253,7 +258,6 @@ class ReportVisualize(QWidget):
 
         pixmap = QPixmap(path)
         os.remove(path)
-        self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
         self._audio_label.setPixmap(pixmap)
 
     def _slider_pressed(self):
