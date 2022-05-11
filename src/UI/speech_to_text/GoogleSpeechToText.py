@@ -11,7 +11,6 @@ from utils.Timer import Timer
 
 from reports import DataStoreManager
 
-
 class GoogleSpeechToText(QObject):
     def __init__(self, parent=None):
         super().__init__()
@@ -34,6 +33,15 @@ class GoogleSpeechToText(QObject):
             return self._textPredictions.pop(0)
         return None
 
+    def _get_microphone_index(self):
+        if Settings.MICROPHONE_INDEX_AND_NAME[0] > -1:
+            index = 0
+            for _, microphone in enumerate(sr.Microphone.list_microphone_names()):
+                print(str(microphone))
+                if str(microphone) == Settings.MICROPHONE_INDEX_AND_NAME[1]:
+                    return index
+        return None
+
     def work(self):
         if self._recognizer is None:  # This "If" is not tested
             QMessageBox.warning(None, "Text", "Text recognizer not available")
@@ -42,7 +50,9 @@ class GoogleSpeechToText(QObject):
 
         self._is_running = True
         self._is_paused = False
-        with sr.Microphone() as source:
+        print("Index: " + str(self._get_microphone_index()))
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        with sr.Microphone(device_index=self._get_microphone_index()) as source:
             timer = Timer()
             timer.start()
 

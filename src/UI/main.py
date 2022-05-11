@@ -6,7 +6,8 @@ import numpy as np
 from PySide6.QtCore import QThread
 
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
+from PySide6.QtMultimedia import QMediaDevices
+from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication, QMessageBox
 
 from PIL import Image, ImageQt
 from transitions import MachineError
@@ -108,21 +109,26 @@ class MainWindow(QMainWindow):
             widgets.emotioTextEdit.setVisible(Settings.TEXT_PREDICTION)
 
             # Default Microphone added manually so all actual microphones are pushed 1 index further
-            Settings.MICROPHONE_INDEX = widgets.microphone_combobox.currentIndex() - 1
+            Settings.MICROPHONE_INDEX_AND_NAME = (widgets.microphone_combobox.currentIndex() - 1,
+                                                  widgets.microphone_combobox.currentText())
 
             self._data_store_manager.set_interviewee_name(widgets.interviewee_name_plaintext.toPlainText() or no_name)
             self._data_store_manager.set_interviewer_name(widgets.interviewer_name_plaintext.toPlainText() or no_name)
+
+            QMessageBox.information(self, "Settings", "Settings saved successfully.")
 
         def initializeHomeSettingsPage():
             widgets.home_save_button.clicked.connect(saveHomeSettings)
 
             widgets.microphone_combobox.addItem("Default Microphone")
             # widgets.speakers_combobox.addItems()
-            for _, microphone in enumerate(sr.Microphone.list_microphone_names()):
-                widgets.microphone_combobox.addItem(str(microphone))
+            # for _, microphone in enumerate(sr.Microphone.list_microphone_names()):
+                # widgets.microphone_combobox.addItem(str(microphone))
+
+            for microphone in QMediaDevices.audioInputs():
+                widgets.microphone_combobox.addItem(microphone.description())
 
         settingsButttonEnabled = False
-        widgets.event_label
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
         widgets.settingsTopBtn.setEnabled(settingsButttonEnabled)
         widgets.settingsTopBtn.setVisible(settingsButttonEnabled)

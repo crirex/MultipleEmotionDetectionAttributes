@@ -11,7 +11,7 @@ class Settings:
     VIDEO_PREDICTION = True
     AUDIO_PREDICTION = True
     TEXT_PREDICTION = True
-    MICROPHONE_INDEX = -1
+    MICROPHONE_INDEX_AND_NAME = (-1, "Default")
 
     # BTNS LEFT AND RIGHT BOX COLORS
     BTN_LEFT_BOX_COLOR = "background-color: rgb(44, 49, 58);"
