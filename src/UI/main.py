@@ -16,7 +16,7 @@ from emotion_recognition import FaceDetectionThread
 from modules import *
 from reports import DataStoreManager
 from speech_to_text import GoogleSpeechToText, TextEmotionDetection
-from utils import Manager
+from utils import Manager, Settings
 from utils.Logger import Logger
 from utils.StateManager import StateManager
 

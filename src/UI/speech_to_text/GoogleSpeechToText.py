@@ -4,8 +4,7 @@ from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QMessageBox
 import time
 
-from modules import Settings
-from utils import Manager
+from utils import Manager, Settings
 from utils.Logger import Logger
 
 from utils.Timer import Timer

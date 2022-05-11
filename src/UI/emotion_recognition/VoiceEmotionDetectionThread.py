@@ -7,7 +7,7 @@ import os
 
 from emotion_recognition.VoiceEmotionPredictionThread import VoiceEmotionPredictionThread
 from reports import DataStoreManager
-from utils import Manager, Logger
+from utils import Manager, Logger, Settings
 from utils.Timer import Timer
 from utils.Wave import WaveUtils
 

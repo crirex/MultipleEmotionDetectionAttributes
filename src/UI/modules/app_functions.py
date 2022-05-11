@@ -14,7 +14,7 @@
 #
 # ///////////////////////////////////////////////////////////////
 
-from modules import Settings
+from utils import Settings
 from main import MainWindow
 
 

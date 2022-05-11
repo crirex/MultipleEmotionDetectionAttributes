@@ -11,6 +11,7 @@ from PIL import Image
 # from PySide6.QtWidgets import QMessageBox
 from emotion_recognition.FaceEmotionDetectionThread import FaceEmotionDetectionThread
 from reports import DataStoreManager
+from utils import Settings
 from utils.Logger import Logger
 from utils.Manager import Manager
 from utils.Timer import Timer

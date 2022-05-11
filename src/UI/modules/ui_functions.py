@@ -22,7 +22,7 @@ from PySide6.QtWidgets import QPushButton, QGraphicsDropShadowEffect
 
 from main import MainWindow
 
-from modules import Settings
+from utils import Settings
 from widgets import CustomGrip
 
 # GLOBALS
