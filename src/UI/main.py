@@ -121,9 +121,6 @@ class MainWindow(QMainWindow):
             widgets.home_save_button.clicked.connect(saveHomeSettings)
 
             widgets.microphone_combobox.addItem("Default Microphone")
-            # widgets.speakers_combobox.addItems()
-            # for _, microphone in enumerate(sr.Microphone.list_microphone_names()):
-                # widgets.microphone_combobox.addItem(str(microphone))
 
             for microphone in QMediaDevices.audioInputs():
                 widgets.microphone_combobox.addItem(microphone.description())
@@ -193,23 +190,28 @@ class MainWindow(QMainWindow):
         self.speech_to_text_thread.resume()
 
     def button_stop_recognition_click(self, button, button_name):
+        self.ui.event_label.setText("Stopping")
         self._state_manager.button_stop_recognition_clicked(button, button_name)
-        self.ui.event_label.setText("Stopped")
 
     def stop_recognition(self):
-        # Video
         self._video_timer.stop()
         self._text_timer.stop()
+
+        # Video
         self.face_detection_thread.stop_running()
+        self.ui.labelVideo.clear()
 
         # Speech to text
         self.speech_to_text_thread.stop()
+        self.ui.emotioTextEdit.clear()
 
         # Audio
         self.ui.audioPlotterWidget.stop_prediction()
+        self.ui.audioPlotterWidget
 
         print(self.ui.emotioTextEdit.toPlainText())
         print(TextEmotionDetection().run(self.ui.emotioTextEdit.toPlainText(), model_name="Personality_traits_NN"))
+        self.ui.event_label.setText("Stopped")
 
     def button_pause_recognition_click(self, button, button_name):
         self._state_manager.button_pause_recognition_clicked(button, button_name)
