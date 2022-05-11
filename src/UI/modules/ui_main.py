@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'mainBPJwTQ.ui'
+## Form generated from reading UI file 'mainUwcUGp.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.2.2
 ##
@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1353, 910)
+        MainWindow.resize(1335, 910)
         MainWindow.setMinimumSize(QSize(940, 560))
         self.styleSheet = QWidget(MainWindow)
         self.styleSheet.setObjectName(u"styleSheet")
@@ -553,10 +553,9 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "")
-        self.appMargins = QVBoxLayout(self.styleSheet)
-        self.appMargins.setSpacing(0)
-        self.appMargins.setObjectName(u"appMargins")
-        self.appMargins.setContentsMargins(10, 10, 10, 10)
+        self.gridLayout_2 = QGridLayout(self.styleSheet)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.gridLayout_2.setContentsMargins(10, 10, 10, 10)
         self.bgApp = QFrame(self.styleSheet)
         self.bgApp.setObjectName(u"bgApp")
         self.bgApp.setStyleSheet(u"")
@@ -1059,6 +1058,182 @@ class Ui_MainWindow(object):
         self.home.setObjectName(u"home")
         self.home.setEnabled(True)
         self.home.setStyleSheet(u"")
+        self.gridLayout_4 = QGridLayout(self.home)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.verticalLayout_16 = QVBoxLayout()
+        self.verticalLayout_16.setObjectName(u"verticalLayout_16")
+        self.verticalLayout_17 = QVBoxLayout()
+        self.verticalLayout_17.setObjectName(u"verticalLayout_17")
+        self.home_icon_label = QLabel(self.home)
+        self.home_icon_label.setObjectName(u"home_icon_label")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.home_icon_label.sizePolicy().hasHeightForWidth())
+        self.home_icon_label.setSizePolicy(sizePolicy3)
+        self.home_icon_label.setMinimumSize(QSize(510, 0))
+        self.home_icon_label.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_17.addWidget(self.home_icon_label)
+
+        self.home_description_label = QLabel(self.home)
+        self.home_description_label.setObjectName(u"home_description_label")
+        sizePolicy3.setHeightForWidth(self.home_description_label.sizePolicy().hasHeightForWidth())
+        self.home_description_label.setSizePolicy(sizePolicy3)
+        self.home_description_label.setMinimumSize(QSize(510, 0))
+        self.home_description_label.setStyleSheet(u"")
+        self.home_description_label.setAlignment(Qt.AlignCenter)
+        self.home_description_label.setWordWrap(True)
+
+        self.verticalLayout_17.addWidget(self.home_description_label)
+
+        self.verticalLayout_18 = QVBoxLayout()
+        self.verticalLayout_18.setObjectName(u"verticalLayout_18")
+        self.verticalLayout_18.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.verticalLayout_22 = QVBoxLayout()
+        self.verticalLayout_22.setObjectName(u"verticalLayout_22")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+
+        self.microphone_label = QLabel(self.home)
+        self.microphone_label.setObjectName(u"microphone_label")
+        sizePolicy4.setHeightForWidth(self.microphone_label.sizePolicy().hasHeightForWidth())
+        self.microphone_label.setSizePolicy(sizePolicy4)
+        self.microphone_label.setMinimumSize(QSize(270, 0))
+
+        self.verticalLayout_22.addWidget(self.microphone_label)
+
+        self.microphone_combobox = QComboBox(self.home)
+        self.microphone_combobox.setObjectName(u"microphone_combobox")
+        sizePolicy4.setHeightForWidth(self.microphone_combobox.sizePolicy().hasHeightForWidth())
+        self.microphone_combobox.setSizePolicy(sizePolicy4)
+        self.microphone_combobox.setMinimumSize(QSize(270, 0))
+        self.microphone_combobox.setStyleSheet(u"background-color: rgb(33, 37, 43);")
+        self.microphone_combobox.setMaxVisibleItems(50)
+
+        self.verticalLayout_22.addWidget(self.microphone_combobox)
+
+
+        self.horizontalLayout_8.addLayout(self.verticalLayout_22)
+
+        self.verticalLayout_23 = QVBoxLayout()
+        self.verticalLayout_23.setObjectName(u"verticalLayout_23")
+        self.verticalLayout_23.setSizeConstraint(QLayout.SetMaximumSize)
+        self.interviewee_name_label = QLabel(self.home)
+        self.interviewee_name_label.setObjectName(u"interviewee_name_label")
+        sizePolicy4.setHeightForWidth(self.interviewee_name_label.sizePolicy().hasHeightForWidth())
+        self.interviewee_name_label.setSizePolicy(sizePolicy4)
+        self.interviewee_name_label.setMinimumSize(QSize(270, 0))
+
+        self.verticalLayout_23.addWidget(self.interviewee_name_label)
+
+        self.interviewee_name_plaintext = QPlainTextEdit(self.home)
+        self.interviewee_name_plaintext.setObjectName(u"interviewee_name_plaintext")
+        sizePolicy4.setHeightForWidth(self.interviewee_name_plaintext.sizePolicy().hasHeightForWidth())
+        self.interviewee_name_plaintext.setSizePolicy(sizePolicy4)
+        self.interviewee_name_plaintext.setMinimumSize(QSize(270, 0))
+        self.interviewee_name_plaintext.setMaximumSize(QSize(16777215, 50))
+        self.interviewee_name_plaintext.setStyleSheet(u"background-color: rgb(33, 37, 43);")
+
+        self.verticalLayout_23.addWidget(self.interviewee_name_plaintext)
+
+        self.interviewer_name_label = QLabel(self.home)
+        self.interviewer_name_label.setObjectName(u"interviewer_name_label")
+        sizePolicy4.setHeightForWidth(self.interviewer_name_label.sizePolicy().hasHeightForWidth())
+        self.interviewer_name_label.setSizePolicy(sizePolicy4)
+        self.interviewer_name_label.setMinimumSize(QSize(270, 0))
+
+        self.verticalLayout_23.addWidget(self.interviewer_name_label)
+
+        self.interviewer_name_plaintext = QPlainTextEdit(self.home)
+        self.interviewer_name_plaintext.setObjectName(u"interviewer_name_plaintext")
+        sizePolicy4.setHeightForWidth(self.interviewer_name_plaintext.sizePolicy().hasHeightForWidth())
+        self.interviewer_name_plaintext.setSizePolicy(sizePolicy4)
+        self.interviewer_name_plaintext.setMinimumSize(QSize(270, 0))
+        self.interviewer_name_plaintext.setMaximumSize(QSize(16777215, 50))
+        self.interviewer_name_plaintext.setStyleSheet(u"background-color: rgb(33, 37, 43);")
+
+        self.verticalLayout_23.addWidget(self.interviewer_name_plaintext)
+
+
+        self.horizontalLayout_8.addLayout(self.verticalLayout_23)
+
+        self.verticalLayout_19 = QVBoxLayout()
+        self.verticalLayout_19.setObjectName(u"verticalLayout_19")
+        self.horizontalLayout_14 = QHBoxLayout()
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.video_prediction_checkbox = QCheckBox(self.home)
+        self.video_prediction_checkbox.setObjectName(u"video_prediction_checkbox")
+        self.video_prediction_checkbox.setMinimumSize(QSize(270, 0))
+        self.video_prediction_checkbox.setLayoutDirection(Qt.LeftToRight)
+        self.video_prediction_checkbox.setStyleSheet(u"")
+        self.video_prediction_checkbox.setChecked(True)
+
+        self.horizontalLayout_14.addWidget(self.video_prediction_checkbox)
+
+
+        self.verticalLayout_19.addLayout(self.horizontalLayout_14)
+
+        self.horizontalLayout_13 = QHBoxLayout()
+        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
+        self.audio_prediction_checkbox = QCheckBox(self.home)
+        self.audio_prediction_checkbox.setObjectName(u"audio_prediction_checkbox")
+        self.audio_prediction_checkbox.setMinimumSize(QSize(270, 0))
+        self.audio_prediction_checkbox.setChecked(True)
+
+        self.horizontalLayout_13.addWidget(self.audio_prediction_checkbox)
+
+
+        self.verticalLayout_19.addLayout(self.horizontalLayout_13)
+
+        self.horizontalLayout_11 = QHBoxLayout()
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.speech_prediction_checkbox = QCheckBox(self.home)
+        self.speech_prediction_checkbox.setObjectName(u"speech_prediction_checkbox")
+        self.speech_prediction_checkbox.setMinimumSize(QSize(270, 0))
+        self.speech_prediction_checkbox.setChecked(True)
+
+        self.horizontalLayout_11.addWidget(self.speech_prediction_checkbox)
+
+
+        self.verticalLayout_19.addLayout(self.horizontalLayout_11)
+
+
+        self.horizontalLayout_8.addLayout(self.verticalLayout_19)
+
+
+        self.verticalLayout_18.addLayout(self.horizontalLayout_8)
+
+        self.horizontalLayout_16 = QHBoxLayout()
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.home_save_button = QPushButton(self.home)
+        self.home_save_button.setObjectName(u"home_save_button")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.home_save_button.sizePolicy().hasHeightForWidth())
+        self.home_save_button.setSizePolicy(sizePolicy5)
+        self.home_save_button.setMinimumSize(QSize(100, 25))
+        self.home_save_button.setLayoutDirection(Qt.LeftToRight)
+        self.home_save_button.setStyleSheet(u"background-color: rgb(52, 59, 72);")
+
+        self.horizontalLayout_16.addWidget(self.home_save_button)
+
+
+        self.verticalLayout_18.addLayout(self.horizontalLayout_16)
+
+
+        self.verticalLayout_17.addLayout(self.verticalLayout_18)
+
+
+        self.verticalLayout_16.addLayout(self.verticalLayout_17)
+
+
+        self.gridLayout_4.addLayout(self.verticalLayout_16, 0, 0, 1, 1)
+
         self.stackedWidget.addWidget(self.home)
         self.widgets = QWidget()
         self.widgets.setObjectName(u"widgets")
@@ -1091,11 +1266,11 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(4, __qtablewidgetitem4)
         self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setEnabled(True)
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
-        self.tableWidget.setSizePolicy(sizePolicy3)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
+        self.tableWidget.setSizePolicy(sizePolicy6)
         palette = QPalette()
         brush = QBrush(QColor(221, 221, 221, 255))
         brush.setStyle(Qt.SolidPattern)
@@ -1164,6 +1339,58 @@ class Ui_MainWindow(object):
         self.new_page.setObjectName(u"new_page")
         self.gridLayout_5 = QGridLayout(self.new_page)
         self.gridLayout_5.setObjectName(u"gridLayout_5")
+        self.verticalLayout_20 = QVBoxLayout()
+        self.verticalLayout_20.setObjectName(u"verticalLayout_20")
+        self.emotioTextEdit = QPlainTextEdit(self.new_page)
+        self.emotioTextEdit.setObjectName(u"emotioTextEdit")
+        sizePolicy.setHeightForWidth(self.emotioTextEdit.sizePolicy().hasHeightForWidth())
+        self.emotioTextEdit.setSizePolicy(sizePolicy)
+        self.emotioTextEdit.setMinimumSize(QSize(200, 200))
+        self.emotioTextEdit.setStyleSheet(u"background-color: rgb(33, 37, 43);")
+
+        self.verticalLayout_20.addWidget(self.emotioTextEdit)
+
+        self.event_label = QLabel(self.new_page)
+        self.event_label.setObjectName(u"event_label")
+        self.event_label.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_20.addWidget(self.event_label)
+
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.cancelButton = QPushButton(self.new_page)
+        self.cancelButton.setObjectName(u"cancelButton")
+        sizePolicy5.setHeightForWidth(self.cancelButton.sizePolicy().hasHeightForWidth())
+        self.cancelButton.setSizePolicy(sizePolicy5)
+        self.cancelButton.setMinimumSize(QSize(150, 0))
+        self.cancelButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
+
+        self.horizontalLayout_6.addWidget(self.cancelButton)
+
+        self.pauseButton = QPushButton(self.new_page)
+        self.pauseButton.setObjectName(u"pauseButton")
+        sizePolicy5.setHeightForWidth(self.pauseButton.sizePolicy().hasHeightForWidth())
+        self.pauseButton.setSizePolicy(sizePolicy5)
+        self.pauseButton.setMinimumSize(QSize(150, 0))
+        self.pauseButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
+
+        self.horizontalLayout_6.addWidget(self.pauseButton)
+
+        self.startButton = QPushButton(self.new_page)
+        self.startButton.setObjectName(u"startButton")
+        sizePolicy5.setHeightForWidth(self.startButton.sizePolicy().hasHeightForWidth())
+        self.startButton.setSizePolicy(sizePolicy5)
+        self.startButton.setMinimumSize(QSize(150, 0))
+        self.startButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
+
+        self.horizontalLayout_6.addWidget(self.startButton)
+
+
+        self.verticalLayout_20.addLayout(self.horizontalLayout_6)
+
+
+        self.gridLayout_5.addLayout(self.verticalLayout_20, 3, 0, 1, 1)
+
         self.gridLayout_8 = QGridLayout()
         self.gridLayout_8.setObjectName(u"gridLayout_8")
         self.labelVideo = QLabel(self.new_page)
@@ -1187,55 +1414,6 @@ class Ui_MainWindow(object):
 
 
         self.gridLayout_5.addLayout(self.gridLayout_8, 2, 0, 1, 2)
-
-        self.verticalLayout_20 = QVBoxLayout()
-        self.verticalLayout_20.setObjectName(u"verticalLayout_20")
-        self.emotioTextEdit = QPlainTextEdit(self.new_page)
-        self.emotioTextEdit.setObjectName(u"emotioTextEdit")
-        sizePolicy.setHeightForWidth(self.emotioTextEdit.sizePolicy().hasHeightForWidth())
-        self.emotioTextEdit.setSizePolicy(sizePolicy)
-        self.emotioTextEdit.setMinimumSize(QSize(200, 200))
-        self.emotioTextEdit.setStyleSheet(u"background-color: rgb(33, 37, 43);")
-
-        self.verticalLayout_20.addWidget(self.emotioTextEdit)
-
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.cancelButton = QPushButton(self.new_page)
-        self.cancelButton.setObjectName(u"cancelButton")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.cancelButton.sizePolicy().hasHeightForWidth())
-        self.cancelButton.setSizePolicy(sizePolicy4)
-        self.cancelButton.setMinimumSize(QSize(150, 0))
-        self.cancelButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
-
-        self.horizontalLayout_6.addWidget(self.cancelButton)
-
-        self.pauseButton = QPushButton(self.new_page)
-        self.pauseButton.setObjectName(u"pauseButton")
-        sizePolicy4.setHeightForWidth(self.pauseButton.sizePolicy().hasHeightForWidth())
-        self.pauseButton.setSizePolicy(sizePolicy4)
-        self.pauseButton.setMinimumSize(QSize(150, 0))
-        self.pauseButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
-
-        self.horizontalLayout_6.addWidget(self.pauseButton)
-
-        self.startButton = QPushButton(self.new_page)
-        self.startButton.setObjectName(u"startButton")
-        sizePolicy4.setHeightForWidth(self.startButton.sizePolicy().hasHeightForWidth())
-        self.startButton.setSizePolicy(sizePolicy4)
-        self.startButton.setMinimumSize(QSize(150, 0))
-        self.startButton.setStyleSheet(u"background-color: rgb(52, 59, 72);")
-
-        self.horizontalLayout_6.addWidget(self.startButton)
-
-
-        self.verticalLayout_20.addLayout(self.horizontalLayout_6)
-
-
-        self.gridLayout_5.addLayout(self.verticalLayout_20, 4, 0, 1, 1)
 
         self.stackedWidget.addWidget(self.new_page)
 
@@ -1278,30 +1456,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_14.setSpacing(0)
         self.verticalLayout_14.setObjectName(u"verticalLayout_14")
         self.verticalLayout_14.setContentsMargins(0, 0, 0, 0)
-        self.btn_message = QPushButton(self.topMenus)
-        self.btn_message.setObjectName(u"btn_message")
-        sizePolicy.setHeightForWidth(self.btn_message.sizePolicy().hasHeightForWidth())
-        self.btn_message.setSizePolicy(sizePolicy)
-        self.btn_message.setMinimumSize(QSize(0, 45))
-        self.btn_message.setFont(font)
-        self.btn_message.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_message.setLayoutDirection(Qt.LeftToRight)
-        self.btn_message.setStyleSheet(u"background-image: url(:/icons/images/icons/cil-envelope-open.png);")
-
-        self.verticalLayout_14.addWidget(self.btn_message)
-
-        self.btn_print = QPushButton(self.topMenus)
-        self.btn_print.setObjectName(u"btn_print")
-        sizePolicy.setHeightForWidth(self.btn_print.sizePolicy().hasHeightForWidth())
-        self.btn_print.setSizePolicy(sizePolicy)
-        self.btn_print.setMinimumSize(QSize(0, 45))
-        self.btn_print.setFont(font)
-        self.btn_print.setCursor(QCursor(Qt.PointingHandCursor))
-        self.btn_print.setLayoutDirection(Qt.LeftToRight)
-        self.btn_print.setStyleSheet(u"background-image: url(:/icons/images/icons/cil-print.png);")
-
-        self.verticalLayout_14.addWidget(self.btn_print)
-
         self.btn_logout = QPushButton(self.topMenus)
         self.btn_logout.setObjectName(u"btn_logout")
         sizePolicy.setHeightForWidth(self.btn_logout.sizePolicy().hasHeightForWidth())
@@ -1346,13 +1500,13 @@ class Ui_MainWindow(object):
         self.appLayout.addWidget(self.contentBox)
 
 
-        self.appMargins.addWidget(self.bgApp)
+        self.gridLayout_2.addWidget(self.bgApp, 0, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.styleSheet)
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1411,6 +1565,15 @@ class Ui_MainWindow(object):
         self.audio_label_prediction.setText(QCoreApplication.translate("MainWindow", u"No prediction for audio", None))
         self.audio_label_report.setText("")
         self.video_label_report.setText("")
+        self.home_icon_label.setText(QCoreApplication.translate("MainWindow", u"Icon", None))
+        self.home_description_label.setText(QCoreApplication.translate("MainWindow", u"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", None))
+        self.microphone_label.setText(QCoreApplication.translate("MainWindow", u"Microphone:", None))
+        self.interviewee_name_label.setText(QCoreApplication.translate("MainWindow", u"Interviewee Name:", None))
+        self.interviewer_name_label.setText(QCoreApplication.translate("MainWindow", u"Interviewer Name:", None))
+        self.video_prediction_checkbox.setText(QCoreApplication.translate("MainWindow", u"Video Prediction", None))
+        self.audio_prediction_checkbox.setText(QCoreApplication.translate("MainWindow", u"Audio Prediction", None))
+        self.speech_prediction_checkbox.setText(QCoreApplication.translate("MainWindow", u"Speech Prediction", None))
+        self.home_save_button.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Interviewee Name", None));
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
@@ -1421,13 +1584,12 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"End Date", None));
         ___qtablewidgetitem4 = self.tableWidget.horizontalHeaderItem(4)
         ___qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", u"Duration", None));
-        self.labelVideo.setText(QCoreApplication.translate("MainWindow", u"Video", None))
         self.emotioTextEdit.setPlainText("")
+        self.event_label.setText("")
         self.cancelButton.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
         self.pauseButton.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
         self.startButton.setText(QCoreApplication.translate("MainWindow", u"Start", None))
-        self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
-        self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
+        self.labelVideo.setText(QCoreApplication.translate("MainWindow", u"Video", None))
         self.btn_logout.setText(QCoreApplication.translate("MainWindow", u"Logout", None))
     # retranslateUi
 

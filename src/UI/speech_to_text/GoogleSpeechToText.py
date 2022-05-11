@@ -4,6 +4,7 @@ from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QMessageBox
 import time
 
+from modules import Settings
 from utils import Manager
 from utils.Logger import Logger
 
@@ -29,9 +30,6 @@ class GoogleSpeechToText(QObject):
         self._recognizer.phrase_threshold = 0.3  # minimum seconds of speaking audio
         self._recognizer.non_speaking_duration = 0.1  # seconds of non-speaking audio being recorded
 
-        for index, name in enumerate(sr.Microphone.list_microphone_names()):
-            print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
-
     def get_new_text(self):
         if len(self._textPredictions) > 0:
             return self._textPredictions.pop(0)
@@ -50,7 +48,7 @@ class GoogleSpeechToText(QObject):
             timer.start()
 
             self._recognizer.adjust_for_ambient_noise(source=source)
-            while self._is_running:
+            while self._is_running and Settings.TEXT_PREDICTION:
                 if self._is_paused:
                     time.sleep(1)
                     continue

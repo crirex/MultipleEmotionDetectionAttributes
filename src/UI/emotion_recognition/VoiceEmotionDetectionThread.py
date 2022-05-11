@@ -68,7 +68,7 @@ class VoiceEmotionDetectionThread(QObject):
         self._data_store_manager.audio_path = full_path
         target_time = 4 * 1000
         try:
-            while self._audio_input_stream.is_active():
+            while self._audio_input_stream.is_active() and Settings.AUDIO_PREDICTION:
                 data = self._audio_input_stream.read(self._frames_per_buffer)
                 self._frames.append(data)
 

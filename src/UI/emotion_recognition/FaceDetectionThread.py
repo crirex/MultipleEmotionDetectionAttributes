@@ -274,7 +274,7 @@ class FaceDetectionThread(QObject):
         start_time = timer.record_time()
         target_time = 4 * 1000
         try:
-            while self._is_running:
+            while self._is_running and Settings.VIDEO_PREDICTION:
                 _, frame = self._manager.active_camera.read()
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

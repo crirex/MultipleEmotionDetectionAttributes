@@ -54,7 +54,7 @@ class MongoDb(metaclass=Singleton):
         predictions = pickle.loads(binary_data)
         return predictions
 
-    def remove_report(self, report, interviewee_name="Test_interviewee_name"):
+    def remove_report(self, report, interviewee_name="No Name"):
         predictions_id = report["predictions_id"]
         self.get_collection(interviewee_name).delete_report(report)
         self._mongo_fs_collection.delete(predictions_id)
