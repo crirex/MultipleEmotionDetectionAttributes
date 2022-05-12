@@ -16,6 +16,9 @@ class DataStoreManager(metaclass=Singleton):
         self.start_date = -1
         self.end_date = -1
 
+        self.interviewee_name = "No Name"
+        self.interviewer_name = "No Name"
+
     def insert_audio(self, data):
         self.audio_predictions[data[0]] = data[1]
 
@@ -27,6 +30,12 @@ class DataStoreManager(metaclass=Singleton):
 
     def set_text_predictions(self, data):
         self.text_predictions = data
+
+    def set_interviewee_name(self, data):
+        self.interviewee_name = data
+
+    def set_interviewer_name(self, data):
+        self.interviewer_name = data
 
     def retrieve_data(self):
         report = Report()

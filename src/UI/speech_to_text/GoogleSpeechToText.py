@@ -4,13 +4,12 @@ from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QMessageBox
 import time
 
-from utils import Manager
+from utils import Manager, Settings
 from utils.Logger import Logger
 
 from utils.Timer import Timer
 
 from reports import DataStoreManager
-
 
 class GoogleSpeechToText(QObject):
     def __init__(self, parent=None):
@@ -29,12 +28,18 @@ class GoogleSpeechToText(QObject):
         self._recognizer.phrase_threshold = 0.3  # minimum seconds of speaking audio
         self._recognizer.non_speaking_duration = 0.1  # seconds of non-speaking audio being recorded
 
-        for index, name in enumerate(sr.Microphone.list_microphone_names()):
-            print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
-
     def get_new_text(self):
         if len(self._textPredictions) > 0:
             return self._textPredictions.pop(0)
+        return None
+
+    def _get_microphone_index(self):
+        if Settings.MICROPHONE_INDEX_AND_NAME[0] > -1:
+            index = 0
+            for _, microphone in enumerate(sr.Microphone.list_microphone_names()):
+                print(str(microphone))
+                if str(microphone) == Settings.MICROPHONE_INDEX_AND_NAME[1]:
+                    return index
         return None
 
     def work(self):
@@ -45,12 +50,14 @@ class GoogleSpeechToText(QObject):
 
         self._is_running = True
         self._is_paused = False
-        with sr.Microphone() as source:
+        print("Index: " + str(self._get_microphone_index()))
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        with sr.Microphone(device_index=self._get_microphone_index()) as source:
             timer = Timer()
             timer.start()
 
             self._recognizer.adjust_for_ambient_noise(source=source)
-            while self._is_running:
+            while self._is_running and Settings.TEXT_PREDICTION:
                 if self._is_paused:
                     time.sleep(1)
                     continue

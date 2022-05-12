@@ -22,7 +22,7 @@ from PySide6.QtWidgets import QPushButton, QGraphicsDropShadowEffect
 
 from main import MainWindow
 
-from modules import Settings
+from utils import Settings
 from widgets import CustomGrip
 
 # GLOBALS
@@ -40,7 +40,7 @@ class UIFunctions(MainWindow):
         if not status:
             self.showMaximized()
             GLOBAL_STATE = True
-            self.ui.appMargins.setContentsMargins(0, 0, 0, 0)
+            self.ui.gridLayout_2.setContentsMargins(0, 0, 0, 0)
             self.ui.maximizeRestoreAppBtn.setToolTip("Restore")
             self.ui.maximizeRestoreAppBtn.setIcon(QIcon(u":/icons/images/icons/icon_restore.png"))
             self.ui.frame_size_grip.hide()
@@ -52,7 +52,7 @@ class UIFunctions(MainWindow):
             GLOBAL_STATE = False
             self.showNormal()
             self.resize(self.width() + 1, self.height() + 1)
-            self.ui.appMargins.setContentsMargins(10, 10, 10, 10)
+            self.ui.gridLayout_2.setContentsMargins(10, 10, 10, 10)
             self.ui.maximizeRestoreAppBtn.setToolTip("Maximize")
             self.ui.maximizeRestoreAppBtn.setIcon(QIcon(u":/icons/images/icons/icon_maximize.png"))
             self.ui.frame_size_grip.show()
@@ -249,7 +249,7 @@ class UIFunctions(MainWindow):
             self.top_grip = CustomGrip(self, Qt.TopEdge, True)
             self.bottom_grip = CustomGrip(self, Qt.BottomEdge, True)
         else:
-            self.ui.appMargins.setContentsMargins(0, 0, 0, 0)
+            self.ui.gridLayout_2.setContentsMargins(0, 0, 0, 0)
             self.ui.minimizeAppBtn.hide()
             self.ui.maximizeRestoreAppBtn.hide()
             self.ui.closeAppBtn.hide()

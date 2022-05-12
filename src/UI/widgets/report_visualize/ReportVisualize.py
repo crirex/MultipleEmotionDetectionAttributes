@@ -9,6 +9,8 @@ from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from reports import Report
 from reports.ReportPredictions import ReportPredictions
 
+import re
+import json
 import datetime
 from intervaltree import IntervalTree
 
@@ -68,8 +70,10 @@ class ReportVisualize(QWidget):
 
         self._player = None
         self._syntax_highlighter = None
+        self._slider_is_pressed = False
 
         self._sample_rate = 16000
+        self._no_data_str = str()
 
     def initialize(self, main_window, report_data, predictions):
         if main_window is None or report_data is None or predictions is None:
@@ -98,6 +102,9 @@ class ReportVisualize(QWidget):
         self._video_label = self._main_window.ui.video_label_report
         self._audio_label = self._main_window.ui.audio_label_report
         self._text_area = self._main_window.ui.text_speech
+        self._current_video_prediction = self._main_window.ui.video_label_prediction
+        self._current_audio_prediction = self._main_window.ui.audio_label_prediction
+        self._text_prediction = self._main_window.ui.text_label_prediction
 
         self._initialize_labels()
         self._initialize_time_labels()
@@ -112,6 +119,9 @@ class ReportVisualize(QWidget):
         self._text_area.setPlainText('. '.join(self._predictions_data.text.values()))
         self._syntax_highlighter = SyntaxHighlighter()
         self._syntax_highlighter.setDocument(self._text_area.document())
+
+        self._text_prediction.setText(
+            "Text Emotions Predictions: " + re.sub("[{}']", "", str(self._predictions_data.text_predictions)))
 
     def _initialize_time_labels(self):
         str_start_time = str(datetime.timedelta(seconds=0))
@@ -144,8 +154,8 @@ class ReportVisualize(QWidget):
 
     def _media_state_changed(self, state):
         icon = QIcon()
-        path = u":/icons/images/icons/cil-media-pause.png" if self._player.playbackState() == QMediaPlayer.PlayingState \
-            else u":/icons/images/icons/cil-media-play.png"
+        path = u":/icons/images/icons/cil-media-pause.png" if \
+            self._player.playbackState() == QMediaPlayer.PlayingState else u":/icons/images/icons/cil-media-play.png"
         icon.addFile(path, QSize(), QIcon.Normal, QIcon.Off)
         self._play_button.setIcon(icon)
 
@@ -167,11 +177,13 @@ class ReportVisualize(QWidget):
         for video_data in self._video_predictions_intervals[value]:
             if video_data.data is None:
                 self._video_label.setText("No data")
+                self._current_video_prediction.setText(self._no_data_str)
                 continue
 
             if video_data != self._video_current_interval:
                 video_frame = video_data.data[0]
                 prediction = video_data.data[1]
+                self._current_video_prediction.setText("Video Emotion Prediction: " + prediction)
                 self._display_frame(video_frame)
                 self._video_current_interval = video_data
                 break
@@ -192,15 +204,19 @@ class ReportVisualize(QWidget):
                 self._text_current_interval = text_data
                 break
 
-        for audio_data in self._audio_predictions_intervals[value]:
-            if audio_data.data is None:
-                continue
+        if not self._slider_is_pressed:
+            for audio_data in self._audio_predictions_intervals[value]:
+                if audio_data.data is None:
+                    self._audio_label.setText("No data")
+                    self._current_audio_prediction.setText(self._no_data_str)
+                    continue
 
-            if audio_data != self._audio_current_interval:
-                audio_frames = audio_data.data[0]
-                prediction = audio_data.data[1]
-                self._display_audio_plot(audio_frames, prediction)
-                self._audio_current_interval = audio_data
+                if audio_data != self._audio_current_interval:
+                    audio_frames = audio_data.data[0]
+                    prediction = audio_data.data[1]
+                    self._display_audio_plot(audio_frames, prediction)
+                    self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
+                    self._audio_current_interval = audio_data
 
     def _slider_moved(self, value):
         self._player.setPosition(value)
@@ -246,10 +262,12 @@ class ReportVisualize(QWidget):
 
     def _slider_pressed(self):
         self._player.pause()
+        self._slider_is_pressed = True
         state = self._player.playbackState()
         self._media_state_changed(state)
 
     def _slider_released(self):
+        self._slider_is_pressed = False
         if self._player.position() != 0:
             self._player.play()
             state = self._player.playbackState()

@@ -11,6 +11,7 @@ from PIL import Image
 # from PySide6.QtWidgets import QMessageBox
 from emotion_recognition.FaceEmotionDetectionThread import FaceEmotionDetectionThread
 from reports import DataStoreManager
+from utils import Settings
 from utils.Logger import Logger
 from utils.Manager import Manager
 from utils.Timer import Timer
@@ -61,7 +62,7 @@ class FaceDetectionThread(QObject):
 
         self._videoTextFont = cv2.QT_FONT_NORMAL
         self._videoTextFontScale = 0.5
-        self._videoTextColor = (255, 255, 255)
+        self._videoTextColor = (255, 150, 0)
         self._facialRectangleColor = (0, 255, 0)
         self._facialDotsColor = (0, 0, 255)
         self._videoTextThickness = 0
@@ -274,7 +275,7 @@ class FaceDetectionThread(QObject):
         start_time = timer.record_time()
         target_time = 4 * 1000
         try:
-            while self._is_running:
+            while self._is_running and Settings.VIDEO_PREDICTION:
                 _, frame = self._manager.active_camera.read()
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

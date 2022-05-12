@@ -7,7 +7,7 @@ import os
 
 from emotion_recognition.VoiceEmotionPredictionThread import VoiceEmotionPredictionThread
 from reports import DataStoreManager
-from utils import Manager, Logger
+from utils import Manager, Logger, Settings
 from utils.Timer import Timer
 from utils.Wave import WaveUtils
 
@@ -68,7 +68,7 @@ class VoiceEmotionDetectionThread(QObject):
         self._data_store_manager.audio_path = full_path
         target_time = 4 * 1000
         try:
-            while self._audio_input_stream.is_active():
+            while self._audio_input_stream.is_active() and Settings.AUDIO_PREDICTION:
                 data = self._audio_input_stream.read(self._frames_per_buffer)
                 self._frames.append(data)
 

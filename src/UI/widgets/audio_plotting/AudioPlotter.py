@@ -4,6 +4,7 @@ from PySide6.QtMultimedia import (QAudioFormat, QAudioSource, QMediaDevices)
 from PySide6.QtWidgets import QMessageBox
 
 from emotion_recognition import VoiceEmotionDetectionThread
+from utils import Settings
 
 SAMPLE_COUNT = 2000
 RESOLUTION = 4
@@ -21,11 +22,7 @@ class AudioPlotter(QChartView):
     def __init__(self, parent):
         super().__init__(parent=parent)
 
-        input_devices = QMediaDevices.audioInputs()
-        if not input_devices:
-            QMessageBox.warning(None, "audio", "There is no audio input device available.")
-
-        self.device = input_devices[0]
+        self.device = None
         self._io_device_plotting = None
         self._audio_input_thread = None
         self._buffer = [QPointF(x, 0) for x in range(SAMPLE_COUNT)]
@@ -46,16 +43,25 @@ class AudioPlotter(QChartView):
         self.chart.setAxisY(self._axis_y, self._series)
         self.chart.legend().hide()
 
-        name = self.device.description()
-        self.chart.setTitle(f"Data from the microphone ({name})")
         self.setChart(self.chart)
         self._series.append(self._buffer)
 
-        self._audio_input_plotting = QAudioSource(self.device, get_audio_format(1, 8000, QAudioFormat.UInt8), self)
+        self._audio_input_plotting = None
 
         self.audio_recording_thread = VoiceEmotionDetectionThread(self)
 
+    def set_device(self):
+        input_devices = QMediaDevices.audioInputs()
+        if not input_devices:
+            QMessageBox.warning(None, "audio", "There is no audio input device available.")
+        self.device = input_devices[
+            Settings.MICROPHONE_INDEX_AND_NAME[0] if Settings.MICROPHONE_INDEX_AND_NAME[0] > -1 else 0]
+        name = self.device.description()
+        self.chart.setTitle(f"Data from the microphone ({name})")
+        self._audio_input_plotting = QAudioSource(self.device, get_audio_format(1, 8000, QAudioFormat.UInt8), self)
+
     def start_plotting(self):
+        self.set_device()
         self._io_device_plotting = self._audio_input_plotting.start()
         self._io_device_plotting.readyRead.connect(self._readyRead)
 

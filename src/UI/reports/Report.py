@@ -6,8 +6,8 @@ class Report:
         self._id = str(uuid.uuid4())
         self.predictions_id = None
 
-        self.interviewee_name = ''
-        self.interviewer_name = ''
+        self.interviewee_name = 'No Name'
+        self.interviewer_name = 'No Name'
 
         self.interview_start_date = -1  # time.time()
         self.interview_end_date = -1    # time.time()
@@ -20,9 +20,8 @@ class Report:
         return self
 
     def initialize(self, data_store_manager):
-        # Alternative until we can get both names from settings
-        self.interviewee_name = "Test_interviewee_name"
-        self.interviewer_name = "Test_interviewer_name"
+        self.interviewee_name = data_store_manager.interviewee_name
+        self.interviewer_name = data_store_manager.interviewer_name
 
         self.interview_start_date = data_store_manager.start_date
         self.interview_end_date = data_store_manager.end_date

@@ -8,6 +8,11 @@ class Settings:
     TIME_ANIMATION = 500
     THREAD_REFERENCE = None
 
+    VIDEO_PREDICTION = True
+    AUDIO_PREDICTION = True
+    TEXT_PREDICTION = True
+    MICROPHONE_INDEX_AND_NAME = (-1, "Default")
+
     # BTNS LEFT AND RIGHT BOX COLORS
     BTN_LEFT_BOX_COLOR = "background-color: rgb(44, 49, 58);"
     BTN_RIGHT_BOX_COLOR = "background-color: #ff79c6;"

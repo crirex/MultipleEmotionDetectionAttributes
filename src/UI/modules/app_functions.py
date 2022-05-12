@@ -14,7 +14,7 @@
 #
 # ///////////////////////////////////////////////////////////////
 
-from modules import Settings
+from utils import Settings
 from main import MainWindow
 
 
@@ -27,14 +27,22 @@ class AppFunctions(MainWindow):
         #566388; """
 
         # SET MANUAL STYLES
-        self.ui.lineEdit.setStyleSheet("background-color: #6272a4;")
-        self.ui.pushButton.setStyleSheet("background-color: #6272a4;")
-        self.ui.plainTextEdit.setStyleSheet("background-color: #6272a4;")
-        self.ui.tableWidget.setStyleSheet("QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { "
-                                          "background: #6272a4; }")
-        self.ui.scrollArea.setStyleSheet("QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { "
-                                         "background: #6272a4; }")
-        self.ui.comboBox.setStyleSheet("background-color: #6272a4;")
-        self.ui.horizontalScrollBar.setStyleSheet("background-color: #6272a4;")
-        self.ui.verticalScrollBar.setStyleSheet("background-color: #6272a4;")
-        self.ui.commandLinkButton.setStyleSheet("color: #ff79c6;")
+        background_color_light_theme = "background-color: #6272a4;"
+        self.ui.cancelButton.setStyleSheet(background_color_light_theme)
+        self.ui.pauseButton.setStyleSheet(background_color_light_theme)
+        self.ui.startButton.setStyleSheet(background_color_light_theme)
+
+        self.ui.emotioTextEdit.setStyleSheet(background_color_light_theme)
+        self.ui.text_speech.setStyleSheet(background_color_light_theme)
+        self.ui.play_button.setStyleSheet(background_color_light_theme)
+
+        # self.ui.comboBox.setStyleSheet("background-color: #6272a4;")
+
+        # self.ui.tableWidget.setStyleSheet("QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { "
+        #                                   "background: #6272a4; }")
+        # self.ui.scrollArea.setStyleSheet("QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { "
+        #                                  "background: #6272a4; }")
+        # self.ui.comboBox.setStyleSheet("background-color: #6272a4;")
+        # self.ui.horizontalScrollBar.setStyleSheet("background-color: #6272a4;")
+        # self.ui.verticalScrollBar.setStyleSheet("background-color: #6272a4;")
+        # self.ui.commandLinkButton.setStyleSheet("color: #ff79c6;")

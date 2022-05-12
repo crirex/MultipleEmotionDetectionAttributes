@@ -6,15 +6,18 @@ import numpy as np
 from PySide6.QtCore import QThread
 
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication
+from PySide6.QtMultimedia import QMediaDevices
+from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication, QMessageBox
 
 from PIL import Image, ImageQt
 from transitions import MachineError
 
+import speech_recognition as sr
 from emotion_recognition import FaceDetectionThread
 from modules import *
+from reports import DataStoreManager
 from speech_to_text import GoogleSpeechToText, TextEmotionDetection
-from utils import Manager
+from utils import Manager, Settings
 from utils.Logger import Logger
 from utils.StateManager import StateManager
 
@@ -30,6 +33,7 @@ def trap_exc_during_debug(*args):
 
 # install exception hook: without this, uncaught exception would cause application to exit
 sys.excepthook = trap_exc_during_debug
+no_name = "No Name"
 
 
 class MainWindow(QMainWindow):
@@ -40,7 +44,7 @@ class MainWindow(QMainWindow):
         self.__threads = []
         self.face_detection_thread = FaceDetectionThread(self)
         self.speech_to_text_thread = GoogleSpeechToText(self)
-
+        self._data_store_manager = DataStoreManager()
         self.ui = Ui_MainWindow()
 
         self._video_timer = QTimer()
@@ -94,7 +98,39 @@ class MainWindow(QMainWindow):
         def openCloseRightBox():
             UIFunctions.toggleRightBox(self, True)
 
+        def saveHomeSettings():
+            Settings.VIDEO_PREDICTION = widgets.video_prediction_checkbox.isChecked()
+            widgets.labelVideo.setVisible(Settings.VIDEO_PREDICTION)
+
+            Settings.AUDIO_PREDICTION = widgets.audio_prediction_checkbox.isChecked()
+            widgets.audioPlotterWidget.setVisible(Settings.AUDIO_PREDICTION)
+
+            Settings.TEXT_PREDICTION = widgets.speech_prediction_checkbox.isChecked()
+            widgets.emotioTextEdit.setVisible(Settings.TEXT_PREDICTION)
+
+            # Default Microphone added manually so all actual microphones are pushed 1 index further
+            Settings.MICROPHONE_INDEX_AND_NAME = (widgets.microphone_combobox.currentIndex() - 1,
+                                                  widgets.microphone_combobox.currentText())
+
+            self._data_store_manager.set_interviewee_name(widgets.interviewee_name_plaintext.toPlainText() or no_name)
+            self._data_store_manager.set_interviewer_name(widgets.interviewer_name_plaintext.toPlainText() or no_name)
+
+            QMessageBox.information(self, "Settings", "Settings saved successfully.")
+
+        def initializeHomeSettingsPage():
+            widgets.home_save_button.clicked.connect(saveHomeSettings)
+
+            widgets.microphone_combobox.addItem("Default Microphone")
+
+            for microphone in QMediaDevices.audioInputs():
+                widgets.microphone_combobox.addItem(microphone.description())
+
+        settingsButttonEnabled = False
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
+        widgets.settingsTopBtn.setEnabled(settingsButttonEnabled)
+        widgets.settingsTopBtn.setVisible(settingsButttonEnabled)
+
+        initializeHomeSettingsPage()
 
         self.show()
 
@@ -114,7 +150,7 @@ class MainWindow(QMainWindow):
 
     def button_reports_click(self, button, button_name):
         # to be changed with the username
-        self.ui.tableWidget.load_reports("Test_interviewee_name")
+        self.ui.tableWidget.load_reports(widgets.interviewee_name_plaintext.toPlainText() or no_name)
         self._state_manager.button_reports_clicked(button, button_name, widgets.widgets)
 
     def button_recognition_click(self, button, button_name):
@@ -126,6 +162,7 @@ class MainWindow(QMainWindow):
 
     def button_start_recognition_click(self, button, button_name):
         self._state_manager.button_start_recognition_clicked(button, button_name)
+        self.ui.event_label.setText("Running")
 
     def start_recognition(self):
         # Video
@@ -153,25 +190,32 @@ class MainWindow(QMainWindow):
         self.speech_to_text_thread.resume()
 
     def button_stop_recognition_click(self, button, button_name):
+        self.ui.event_label.setText("Stopping")
         self._state_manager.button_stop_recognition_clicked(button, button_name)
 
     def stop_recognition(self):
-        # Video
         self._video_timer.stop()
         self._text_timer.stop()
+
+        # Video
         self.face_detection_thread.stop_running()
+        self.ui.labelVideo.clear()
 
         # Speech to text
         self.speech_to_text_thread.stop()
+        self.ui.emotioTextEdit.clear()
 
         # Audio
         self.ui.audioPlotterWidget.stop_prediction()
+        self.ui.audioPlotterWidget
 
         print(self.ui.emotioTextEdit.toPlainText())
         print(TextEmotionDetection().run(self.ui.emotioTextEdit.toPlainText(), model_name="Personality_traits_NN"))
+        self.ui.event_label.setText("Stopped")
 
     def button_pause_recognition_click(self, button, button_name):
         self._state_manager.button_pause_recognition_clicked(button, button_name)
+        self.ui.event_label.setText("Paused")
 
     def pause_recognition(self):
         self.face_detection_thread.pause_running()
@@ -242,6 +286,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     import nltk
+
     nltk.download('stopwords')
     nltk.download('averaged_perceptron_tagger')
     nltk.download('wordnet')
