@@ -10,7 +10,6 @@ from reports import Report
 from reports.ReportPredictions import ReportPredictions
 
 import re
-import json
 import datetime
 from intervaltree import IntervalTree
 
@@ -195,10 +194,6 @@ class ReportVisualize(QWidget):
             if text_data != self._text_current_interval:
                 text = text_data.data
                 self._syntax_highlighter.set_text(text)
-                self._syntax_highlighter.highlightBlock(text)
-
-                # Hack in order to update text highlight
-                # self._text_area.insertPlainText(' ')
 
                 self._text_area.setPlainText(self._text_area.toPlainText())
                 self._text_current_interval = text_data
@@ -284,3 +279,4 @@ class ReportVisualize(QWidget):
             self._slider.valueChanged.disconnect()
             self._slider.sliderMoved.disconnect()
             self._slider.sliderPressed.disconnect()
+            self._slider.sliderReleased.disconnect()

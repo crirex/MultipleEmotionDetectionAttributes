@@ -70,6 +70,10 @@ class AudioPlotter(QChartView):
             self._audio_input_plotting.stop()
             self.audio_recording_thread.stop_prediction()
 
+            self._series.clear()
+            self._buffer = [QPointF(x, 0) for x in range(SAMPLE_COUNT)]
+            self._series.append(self._buffer)
+
     def pause_prediction(self):
         self.audio_recording_thread.pause_prediction()
 

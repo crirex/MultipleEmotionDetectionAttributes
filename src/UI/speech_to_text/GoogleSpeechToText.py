@@ -51,7 +51,6 @@ class GoogleSpeechToText(QObject):
         self._is_running = True
         self._is_paused = False
         print("Index: " + str(self._get_microphone_index()))
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         with sr.Microphone(device_index=self._get_microphone_index()) as source:
             timer = Timer()
             timer.start()

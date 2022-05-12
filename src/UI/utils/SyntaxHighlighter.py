@@ -6,23 +6,19 @@ import re
 class SyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.format = QTextCharFormat()
-        self.format.setForeground(Qt.yellow)
-        self.format.setFontWeight(QFont.Bold)
+        self._format = QTextCharFormat()
+        self._format.setForeground(Qt.yellow)
+        self._format.setFontWeight(QFont.Bold)
 
-        self.text_mapping = ''
+        self._text_mapping = ''
 
     def set_text(self, text):
-        self.text_mapping = text
+        self._text_mapping = text
 
     def highlightBlock(self, text_block):
-        if self.text_mapping == '':
+        if self._text_mapping == '':
             return
 
-        for match in re.finditer(self.text_mapping, text_block):
+        for match in re.finditer(self._text_mapping, text_block):
             start, end = match.span()
-            self.setFormat(start, end - start, self.format)
-
-    def clear_highlight(self):
-        self.text_mapping = ''
-        self.rehighlight()
+            self.setFormat(start, end - start, self._format)
