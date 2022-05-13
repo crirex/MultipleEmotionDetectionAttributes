@@ -116,7 +116,7 @@ class ReportVisualize(QWidget):
         self._text_area.clear()
 
         self._text_area.setPlainText('. '.join(self._predictions_data.text.values()))
-        self._syntax_highlighter = SyntaxHighlighter()
+        self._syntax_highlighter = SyntaxHighlighter(self._text_intervals)
         self._syntax_highlighter.setDocument(self._text_area.document())
 
         self._text_prediction.setText(
@@ -192,26 +192,29 @@ class ReportVisualize(QWidget):
                 continue
 
             if text_data != self._text_current_interval:
+                self._text_current_interval = text_data
                 text = text_data.data
+
                 self._syntax_highlighter.set_text(text)
+                self._syntax_highlighter.set_interval(self._text_current_interval)
 
                 self._text_area.setPlainText(self._text_area.toPlainText())
-                self._text_current_interval = text_data
                 break
 
-        if not self._slider_is_pressed:
-            for audio_data in self._audio_predictions_intervals[value]:
-                if audio_data.data is None:
-                    self._audio_label.setText("No data")
-                    self._current_audio_prediction.setText(self._no_data_str)
-                    continue
+        for audio_data in self._audio_predictions_intervals[value]:
+            if audio_data.data is None:
+                self._audio_label.setText("No data")
+                self._current_audio_prediction.setText(self._no_data_str)
+                continue
 
-                if audio_data != self._audio_current_interval:
-                    audio_frames = audio_data.data[0]
-                    prediction = audio_data.data[1]
+            if audio_data != self._audio_current_interval:
+                audio_frames = audio_data.data[0]
+                prediction = audio_data.data[1]
+                self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
+                self._audio_current_interval = audio_data
+
+                if not self._slider_is_pressed:
                     self._display_audio_plot(audio_frames, prediction)
-                    self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
-                    self._audio_current_interval = audio_data
 
     def _slider_moved(self, value):
         self._player.setPosition(value)
