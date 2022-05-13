@@ -36,6 +36,10 @@ class AppFunctions(MainWindow):
         self.ui.text_speech.setStyleSheet(background_color_light_theme)
         self.ui.play_button.setStyleSheet(background_color_light_theme)
 
+        self.ui.interviewee_name_plaintext.setStyleSheet(background_color_light_theme)
+        self.ui.interviewer_name_plaintext.setStyleSheet(background_color_light_theme)
+        self.ui.microphone_combobox.setStyleSheet(background_color_light_theme)
+
         # self.ui.comboBox.setStyleSheet("background-color: #6272a4;")
 
         # self.ui.tableWidget.setStyleSheet("QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { "

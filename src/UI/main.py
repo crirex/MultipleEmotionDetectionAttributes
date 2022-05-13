@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 
 import cv2
 import numpy as np
@@ -12,7 +13,6 @@ from PySide6.QtWidgets import QMainWindow, QHeaderView, QApplication, QMessageBo
 from PIL import Image, ImageQt
 from transitions import MachineError
 
-import speech_recognition as sr
 from emotion_recognition import FaceDetectionThread
 from modules import *
 from reports import DataStoreManager
@@ -24,7 +24,6 @@ from utils.StateManager import StateManager
 os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100%
 
 widgets = None
-
 
 def trap_exc_during_debug(*args):
     # when app raises uncaught exception, print info
@@ -39,7 +38,7 @@ no_name = "No Name"
 class MainWindow(QMainWindow):
     logger = Logger()
 
-    def __init__(self):
+    def __init__(self, theme_name):
         QMainWindow.__init__(self)
         self.__threads = []
         self.face_detection_thread = FaceDetectionThread(self)
@@ -134,12 +133,11 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        useCustomTheme = False
+        useLightTheme = True if len(theme_name) > 0 and theme_name.lower()[0] == 'l' else False
         themeFile = "themes\py_dracula_light.qss"
 
-        if useCustomTheme:
+        if useLightTheme:
             UIFunctions.theme(self, themeFile, True)
-
             AppFunctions.setThemeHack(self)
 
         widgets.stackedWidget.setCurrentWidget(widgets.home)
@@ -285,8 +283,14 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    import nltk
+    parser = argparse.ArgumentParser(description="Multimodal Emotion Detection")
+    parser.add_argument('--theme', type=str)
+    args = parser.parse_args()
+    theme_name_arg = ''
+    if args.__contains__("theme") and args.theme is not None:
+        theme_name_arg = args.theme
 
+    import nltk
     nltk.download('stopwords')
     nltk.download('averaged_perceptron_tagger')
     nltk.download('wordnet')
@@ -296,5 +300,5 @@ if __name__ == "__main__":
     manager = Manager()
     manager.app = QApplication(sys.argv)
     manager.app.setWindowIcon(QIcon("icon.ico"))
-    manager.window = MainWindow()
+    manager.window = MainWindow(theme_name_arg)
     sys.exit(manager.app.exec())
