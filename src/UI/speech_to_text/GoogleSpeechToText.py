@@ -11,6 +11,7 @@ from utils.Timer import Timer
 
 from reports import DataStoreManager
 
+
 class GoogleSpeechToText(QObject):
     def __init__(self, parent=None):
         super().__init__()

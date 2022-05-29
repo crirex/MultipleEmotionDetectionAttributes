@@ -124,6 +124,9 @@ class MainWindow(QMainWindow):
             for microphone in QMediaDevices.audioInputs():
                 widgets.microphone_combobox.addItem(microphone.description())
 
+            icon = QPixmap("./images/images/logo.png")
+            widgets.home_icon_label.setPixmap(icon)
+
         settingsButttonEnabled = False
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
         widgets.settingsTopBtn.setEnabled(settingsButttonEnabled)
@@ -205,7 +208,7 @@ class MainWindow(QMainWindow):
 
         # Audio
         self.ui.audioPlotterWidget.stop_prediction()
-        self.ui.audioPlotterWidget
+        # self.ui.audioPlotterWidget
 
         print(self.ui.emotioTextEdit.toPlainText())
         print(TextEmotionDetection().run(self.ui.emotioTextEdit.toPlainText(), model_name="Personality_traits_NN"))

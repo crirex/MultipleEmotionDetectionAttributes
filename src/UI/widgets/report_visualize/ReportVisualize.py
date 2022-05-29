@@ -214,7 +214,7 @@ class ReportVisualize(QWidget):
                 self._audio_current_interval = audio_data
 
                 if not self._slider_is_pressed:
-                    self._display_audio_plot(audio_frames, prediction)
+                    self._display_audio_plot(audio_frames)
 
     def _slider_moved(self, value):
         self._player.setPosition(value)
@@ -230,7 +230,7 @@ class ReportVisualize(QWidget):
         pm = QPixmap.fromImage(qim)
         self._video_label.setPixmap(pm)
 
-    def _display_audio_plot(self, audio_frames, prediction):
+    def _display_audio_plot(self, audio_frames):
         mel_spect = np.abs(
             librosa.stft(audio_frames, n_fft=512, window='hamming', win_length=256, hop_length=128)) ** 2
 
