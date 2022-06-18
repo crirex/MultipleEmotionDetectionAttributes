@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QTableWidget, QTableWidgetItem, QMenu
+from PySide6.QtWidgets import QTableWidget, QTableWidgetItem, QMenu, QFileDialog
 
 import time
 import datetime
@@ -6,6 +6,7 @@ import datetime
 from persistance import MongoDb
 from utils.StateManager import StateManager
 from utils import Manager
+from widgets.report_table.ReportExporter import ReportExporter
 
 time_format = "%Y-%m-%d %H:%M:%S"
 
@@ -66,7 +67,12 @@ class ReportTable(QTableWidget):
             self._mongo_db.remove_report(report_to_remove)
 
     def export_report(self, report_index):
-        print("Export " + str(report_index))
+        if report_index >= 0 and len(self._reports) > 0:
+            report_to_export = self._reports[report_index]
+            path = QFileDialog.getExistingDirectory(self, caption='Select path')
+
+            report_exporter = ReportExporter(path)
+            report_exporter.export_report(report_to_export)
 
     def reset_report_view(self):
         if self._manager.window is None:
@@ -81,7 +87,6 @@ class ReportTable(QTableWidget):
 
         if len(self._reports) > 0 and index >= 0:
             report = self._reports[index]
-
             predictions = self._mongo_db.get_prediction(report['predictions_id'])
 
             self.reset_report_view()

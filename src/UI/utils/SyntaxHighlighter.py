@@ -26,6 +26,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
             return
         index_to_highlight = self.find_index_of_interval()
         index = 0
+        # bug found -> Because the recognition adds *** for curses (which is a special character in regex)
+        # it throws an exception
         for match in re.finditer(self._text_mapping, text_block):
             if index_to_highlight == index:
                 start, end = match.span()
