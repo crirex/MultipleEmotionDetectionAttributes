@@ -25,6 +25,7 @@ os.environ["QT_FONT_DPI"] = "96"  # FIX Problem for High DPI and Scale above 100
 
 widgets = None
 
+
 def trap_exc_during_debug(*args):
     # when app raises uncaught exception, print info
     print(args)
@@ -126,8 +127,9 @@ class MainWindow(QMainWindow):
 
             icon = QPixmap("./images/images/logo.png")
             widgets.home_icon_label.setPixmap(icon)
+            widgets.home_description_label.setText(Settings.DESCRIPTION)
 
-        settingsButttonEnabled = False
+        settingsButttonEnabled = True
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
         widgets.settingsTopBtn.setEnabled(settingsButttonEnabled)
         widgets.settingsTopBtn.setVisible(settingsButttonEnabled)
@@ -294,6 +296,7 @@ if __name__ == "__main__":
         theme_name_arg = args.theme
 
     import nltk
+
     nltk.download('stopwords')
     nltk.download('averaged_perceptron_tagger')
     nltk.download('wordnet')

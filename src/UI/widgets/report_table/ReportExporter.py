@@ -1,12 +1,18 @@
 import time
 
 from collections import Counter
+
+from PySide6.QtWidgets import QMessageBox
+
 from persistance import MongoDb
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 
+from utils import Manager
+
 time_format = "%Y-%m-%d %H-%M"
+export_title = "Export report"
 
 
 def plot_bar(predictions, title, subplot, fig):
@@ -61,10 +67,10 @@ class ReportExporter:
     def __init__(self, path):
         self._mongo_db = MongoDb()
         self._path = path
+        self._manager = Manager()
 
     def export_report(self, report):
         predictions = self._mongo_db.get_prediction(report['predictions_id'])
-        print(report)
 
         plt.rcParams["figure.figsize"] = [7.00, 3.50]
         plt.rcParams["figure.autolayout"] = True
@@ -83,7 +89,11 @@ class ReportExporter:
         filename = self._path + f"\\{report['interviewee_name']}-" \
                                 f"{report['interviewer_name']}-" \
                                 f"{time.strftime(time_format, time.localtime(report['interview_start_date']))}.pdf"
+
         try:
             save_multi_image(filename)
+            QMessageBox.information(self._manager.window, export_title, "Report exported successfully.")
+        except:
+            QMessageBox.warning(self._manager.window, export_title, "Report couldn't exported.")
         finally:
             plt.close("all")
