@@ -1,0 +1,15 @@
+Features that can be used in emotion recognition via voice
+1. Pitch
+2. Teager Energy Operator -> Number of harmonics (https://www.youtube.com/watch?v=znbfY-tXROk)
+3. Vocal tract features
+4. Pitch
+5. Energy
+6. MFCC 
+7. LPCC
+8. Formants
+
+https://machinelearningmastery.com/gentle-introduction-long-short-term-memory-networks-experts/ LSTM
+https://machinelearningmastery.com/cnn-long-short-term-memory-networks/ CNN and LSTM
+https://towardsdatascience.com/using-cnns-and-rnns-for-music-genre-recognition-2435fb2ed6af CNN and RNN for genre recog
+
+https://www.kaggle.com/ejlok1/audio-emotion-part-1-explore-data
