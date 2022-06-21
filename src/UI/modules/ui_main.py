@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1335, 910)
+        MainWindow.resize(1000, 800)
         MainWindow.setMinimumSize(QSize(940, 560))
         self.styleSheet = QWidget(MainWindow)
         self.styleSheet.setObjectName(u"styleSheet")
@@ -1082,7 +1082,7 @@ class Ui_MainWindow(object):
         self.home_description_label.setSizePolicy(sizePolicy3)
         self.home_description_label.setMinimumSize(QSize(510, 0))
         self.home_description_label.setStyleSheet(u"")
-        self.home_description_label.setAlignment(Qt.AlignCenter)
+        self.home_description_label.setAlignment(Qt.AlignLeft)
         self.home_description_label.setWordWrap(True)
 
         self.verticalLayout_17.addWidget(self.home_description_label)

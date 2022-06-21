@@ -13,6 +13,15 @@ class Settings:
     TEXT_PREDICTION = True
     MICROPHONE_INDEX_AND_NAME = (-1, "Default")
 
+    DESCRIPTION = \
+        "Multimodal Emotion Detection helps thorough the process of interview to investigate the emotions of " \
+        "of the candidate.\n" \
+        "1. Home Button - Enable/Disable recording channels and add names for the candidate and interviewer\n" \
+        "2. Start recording emotions\n" \
+        "3. Review interviews and the emotions. Delete or export statistics\n" \
+        "4. Exit application\n\n" \
+        "Authors: Bălan Cristian, Hanganu Bogdan"
+
     # BTNS LEFT AND RIGHT BOX COLORS
     BTN_LEFT_BOX_COLOR = "background-color: rgb(44, 49, 58);"
     BTN_RIGHT_BOX_COLOR = "background-color: #ff79c6;"
