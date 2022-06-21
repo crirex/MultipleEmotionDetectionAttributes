@@ -70,6 +70,7 @@ class ReportExporter:
         self._manager = Manager()
 
     def export_report(self, report):
+        plt.close("all")
         predictions = self._mongo_db.get_prediction(report['predictions_id'])
 
         plt.rcParams["figure.figsize"] = [7.00, 3.50]
