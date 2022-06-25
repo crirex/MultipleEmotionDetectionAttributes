@@ -279,7 +279,6 @@ class MainWindow(QMainWindow):
         self.logger.log_debug('All threads exited')
 
     def closeEvent(self, event):
-        self._state_manager.button_exit_clicked(None, "Exit")
         self.abort_workers()
 
     def reset_style(self, button_name):
