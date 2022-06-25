@@ -70,7 +70,7 @@ class ReportTable(QTableWidget):
             report_to_remove = self._reports[report_index]
             self._reports.remove(report_to_remove)
             self.removeRow(report_index)
-            self._mongo_db.remove_report(report_to_remove)
+            self._mongo_db.remove_report(report_to_remove, interviewee_name=report_to_remove['interviewee_name'])
 
     def export_report(self, report_index):
         if report_index >= 0 and len(self._reports) > 0:
