@@ -1561,7 +1561,7 @@ class Ui_MainWindow(object):
         self.play_button.setText("")
         self.label.setText(QCoreApplication.translate("MainWindow", u"CurrentTime", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"TotalTime", None))
-        self.video_label_prediction.setText(QCoreApplication.translate("MainWindow", u"No prediction for text", None))
+        self.video_label_prediction.setText(QCoreApplication.translate("MainWindow", u"No prediction for video", None))
         self.audio_label_prediction.setText(QCoreApplication.translate("MainWindow", u"No prediction for audio", None))
         self.audio_label_report.setText("")
         self.video_label_report.setText("")

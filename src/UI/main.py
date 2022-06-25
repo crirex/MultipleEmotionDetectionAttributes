@@ -138,10 +138,9 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        useLightTheme = True if len(theme_name) > 0 and theme_name.lower()[0] == 'l' else False
         themeFile = "themes\py_dracula_light.qss"
 
-        if useLightTheme:
+        if manager.lightTheme:
             UIFunctions.theme(self, themeFile, True)
             AppFunctions.setThemeHack(self)
 
@@ -295,6 +294,9 @@ if __name__ == "__main__":
     if args.__contains__("theme") and args.theme is not None:
         theme_name_arg = args.theme
 
+    manager = Manager()
+    manager.lightTheme = True if len(theme_name_arg) > 0 and theme_name_arg.lower()[0] == 'l' else False
+
     import nltk
 
     nltk.download('stopwords')
@@ -303,7 +305,6 @@ if __name__ == "__main__":
     nltk.download('omw-1.4')
 
     MainWindow.logger.log_info("Application starts")
-    manager = Manager()
     manager.app = QApplication(sys.argv)
     manager.app.setWindowIcon(QIcon("icon.ico"))
     manager.window = MainWindow(theme_name_arg)

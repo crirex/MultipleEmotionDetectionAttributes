@@ -1699,7 +1699,7 @@ p, li { white-space: pre-wrap; }
                          <item>
                           <widget class="QLabel" name="video_label_prediction">
                            <property name="text">
-                            <string>No prediction for text</string>
+                            <string>No prediction for video</string>
                            </property>
                           </widget>
                          </item>

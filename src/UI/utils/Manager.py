@@ -15,6 +15,8 @@ class Manager(metaclass=Singleton):
         self.video_predictor_landmarks = dlib.shape_predictor("Models/face_landmarks.dat")
         self.active_camera = cv2.VideoCapture(0)
 
+        self.lightTheme = False
+
         self.audio_model = load_model('Models/audio_v2.hdf5', compile=False)
         self.prepare_manager()
 
