@@ -48,4 +48,8 @@ class DataStoreManager(metaclass=Singleton):
         return report, report_predictions
 
     def clear(self):
+        interviewee_name = self.interviewee_name
+        interviewer_name = self.interviewer_name
         self.__init__()
+        self.interviewee_name = interviewee_name
+        self.interviewer_name = interviewer_name

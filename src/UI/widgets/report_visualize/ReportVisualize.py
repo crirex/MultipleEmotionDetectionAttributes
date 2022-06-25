@@ -179,26 +179,26 @@ class ReportVisualize(QWidget):
                 self._current_video_prediction.setText(self._no_data_str)
                 continue
 
-            if video_data != self._video_current_interval:
+            if video_data.begin != self._video_current_interval:
                 video_frame = video_data.data[0]
                 prediction = video_data.data[1]
                 self._current_video_prediction.setText("Video Emotion Prediction: " + prediction)
                 self._display_frame(video_frame)
-                self._video_current_interval = video_data
+                self._video_current_interval = video_data.begin
                 break
 
         for text_data in self._text_intervals[value]:
             if text_data.data is None:
                 continue
 
-            if text_data != self._text_current_interval:
-                self._text_current_interval = text_data
-                text = text_data.data
+            if text_data.begin != self._text_current_interval:
+                self._syntax_highlighter.set_interval(text_data)
 
+                text = text_data.data
                 self._syntax_highlighter.set_text(text)
-                self._syntax_highlighter.set_interval(self._text_current_interval)
 
                 self._text_area.setPlainText(self._text_area.toPlainText())
+                self._text_current_interval = text_data.begin
                 break
 
         for audio_data in self._audio_predictions_intervals[value]:
@@ -207,11 +207,11 @@ class ReportVisualize(QWidget):
                 self._current_audio_prediction.setText(self._no_data_str)
                 continue
 
-            if audio_data != self._audio_current_interval:
+            if audio_data.begin != self._audio_current_interval:
                 audio_frames = audio_data.data[0]
                 prediction = audio_data.data[1]
                 self._current_audio_prediction.setText("Audio Emotion Prediction: " + prediction)
-                self._audio_current_interval = audio_data
+                self._audio_current_interval = audio_data.begin
 
                 if not self._slider_is_pressed:
                     self._display_audio_plot(audio_frames)
@@ -231,8 +231,7 @@ class ReportVisualize(QWidget):
         self._video_label.setPixmap(pm)
 
     def _display_audio_plot(self, audio_frames):
-        mel_spect = np.abs(
-            librosa.stft(audio_frames, n_fft=512, window='hamming', win_length=256, hop_length=128)) ** 2
+        mel_spect = np.abs(librosa.stft(audio_frames, n_fft=512, window='hamming', win_length=256, hop_length=128)) ** 2
 
         # Compute mel spectrogram
         mel_spect = librosa.feature.melspectrogram(S=mel_spect, sr=16000, n_mels=128, fmax=4000)
@@ -250,9 +249,12 @@ class ReportVisualize(QWidget):
             os.makedirs(path)
         path = f"./temp/{id}.png"
 
-        plt.figure(figsize=(x_pixels // dpi, y_pixels // dpi), dpi=dpi, frameon=False)
+        # plt.figure(figsize=(x_pixels // dpi, y_pixels // dpi), dpi=dpi, frameon=False)
         librosa.display.specshow(mel_spect, y_axis='linear')
-        plt.savefig(path, bbox_inches='tight', pad_inches=0, dpi=dpi)
+        plt.title('Mel-Spectrogram (dB)', fontdict=dict(size=18))
+        plt.ylabel('Frequency', fontdict=dict(size=15))
+        plt.xlabel('Time', fontdict=dict(size=15))
+        plt.savefig(path, bbox_inches='tight', pad_inches=0)
 
         pixmap = QPixmap(path)
         os.remove(path)
@@ -283,3 +285,7 @@ class ReportVisualize(QWidget):
             self._slider.sliderMoved.disconnect()
             self._slider.sliderPressed.disconnect()
             self._slider.sliderReleased.disconnect()
+
+        self._video_current_interval = None
+        self._audio_current_interval = None
+        self._text_current_interval = None
