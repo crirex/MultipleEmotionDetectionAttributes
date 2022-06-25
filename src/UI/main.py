@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
             widgets.audioPlotterWidget.setVisible(Settings.AUDIO_PREDICTION)
 
             Settings.TEXT_PREDICTION = widgets.speech_prediction_checkbox.isChecked()
-            widgets.emotioTextEdit.setVisible(Settings.TEXT_PREDICTION)
+            widgets.emotioTextEdit.setDisabled(not Settings.TEXT_PREDICTION)
 
             # Default Microphone added manually so all actual microphones are pushed 1 index further
             Settings.MICROPHONE_INDEX_AND_NAME = (widgets.microphone_combobox.currentIndex() - 1,
@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
 
     def button_reports_click(self, button, button_name):
         # to be changed with the username
-        self.ui.tableWidget.load_reports(widgets.interviewee_name_plaintext.toPlainText() or no_name)
+        self.ui.tableWidget.load_reports(self._data_store_manager.interviewee_name)
         self._state_manager.button_reports_clicked(button, button_name, widgets.widgets)
 
     def button_recognition_click(self, button, button_name):
@@ -212,8 +212,10 @@ class MainWindow(QMainWindow):
         self.ui.audioPlotterWidget.stop_prediction()
         # self.ui.audioPlotterWidget
 
-        print(self.ui.emotioTextEdit.toPlainText())
-        print(TextEmotionDetection().run(self.ui.emotioTextEdit.toPlainText(), model_name="Personality_traits_NN"))
+        if Settings.TEXT_PREDICTION:
+            print(self.ui.emotioTextEdit.toPlainText())
+            print(TextEmotionDetection().run(self.ui.emotioTextEdit.toPlainText(), model_name="Personality_traits_NN"))
+
         self.ui.event_label.setText("Stopped")
 
     def button_pause_recognition_click(self, button, button_name):
