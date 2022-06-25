@@ -22,6 +22,12 @@ class ReportTable(QTableWidget):
         self._delete_action = self._menu.addAction("Delete Report")
         self._export_action = self._menu.addAction("Export Report")
 
+        self._manager = Manager()
+
+        if self._manager.lightTheme:
+            background_color_light_theme = "background-color: #6272a4;"
+            self._menu.setStyleSheet(background_color_light_theme)
+
         self._action_to_func = {
             self._delete_action: self.delete_report,
             self._export_action: self.export_report
@@ -64,7 +70,7 @@ class ReportTable(QTableWidget):
             report_to_remove = self._reports[report_index]
             self._reports.remove(report_to_remove)
             self.removeRow(report_index)
-            self._mongo_db.remove_report(report_to_remove)
+            self._mongo_db.remove_report(report_to_remove, interviewee_name=report_to_remove['interviewee_name'])
 
     def export_report(self, report_index):
         if report_index >= 0 and len(self._reports) > 0:
@@ -95,5 +101,7 @@ class ReportTable(QTableWidget):
 
     def contextMenuEvent(self, event) -> None:
         action = self._menu.exec_(self.mapToGlobal(event.pos()))
+        if action is None:
+            return
         index = self.indexAt(event.pos()).row()
         self._action_to_func[action](index)
