@@ -112,8 +112,10 @@ class MainWindow(QMainWindow):
             Settings.MICROPHONE_INDEX_AND_NAME = (widgets.microphone_combobox.currentIndex() - 1,
                                                   widgets.microphone_combobox.currentText())
 
-            self._data_store_manager.set_interviewee_name(widgets.interviewee_name_plaintext.toPlainText() or no_name)
-            self._data_store_manager.set_interviewer_name(widgets.interviewer_name_plaintext.toPlainText() or no_name)
+            self._data_store_manager.set_interviewee_name(
+                widgets.interviewee_name_plaintext.toPlainText().replace("\t", "") or no_name)
+            self._data_store_manager.set_interviewer_name(
+                widgets.interviewer_name_plaintext.toPlainText().replace("\t", "") or no_name)
 
             QMessageBox.information(self, "Settings", "Settings saved successfully.")
 
